@@ -1,12 +1,12 @@
 from parglare import Grammar
-from parglare import Parser
+from parglare import GLRParser
 
 grammar = Grammar.from_file("cgrammar.pg")
-parser = Parser(grammar)
+parser = GLRParser(grammar, build_tree=True)
 
 code = """
 
-union student 
+union student
 {
    char name[20];
    char subject[20];
@@ -27,9 +27,13 @@ int main(int argc, const char **argv){
    struct Books Book1;
    Book1.book_id = 6495407;
 
-	return 0;
+   return 0;
 }
 """
 
 results = parser.parse(code)
-
+trees_count = min(len(results), 10)
+for tree in range(trees_count):
+    print('Dumpring tree {}'.format(tree))
+    with open('tree_{}.txt'.format(tree), 'w') as f:
+        f.write(results[tree].tree_str())
