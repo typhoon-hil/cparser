@@ -118,7 +118,7 @@ type_qualifier_list	      : type_qualifier
                           ;
 
 param_type_list		        : param_list
-                          | param_list ',' '...'
+                          | param_list ',' ellipsis
                           ;
 
 param_list		            : param_decl
@@ -304,7 +304,7 @@ postfix_exp		              : primary_exp
 			                      | postfix_exp '[' exp ']'
                             | postfix_exp '(' argument_exp_list ')'
                             | postfix_exp '('			')'
-                            | postfix_exp '.' id
+                            | postfix_exp dot id
                             | postfix_exp '->' id
                             | postfix_exp '++'
                             | postfix_exp '--'
@@ -330,9 +330,12 @@ cconst                      : int_const
 //
 // Not part of the original grammar
 //
+terminals
 int_const: /[-+]?[0-9]+\b/;
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?(?<=[\w\.])(?![\w\.])/;
 char_const: /'[^']*'/;
+ellipsis: '...';
+dot: '.';
 
 
 string: /("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')/;
