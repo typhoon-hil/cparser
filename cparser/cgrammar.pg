@@ -331,7 +331,7 @@ cconst                      : int_const
 // Not part of the original grammar
 //
 terminals
-int_const: /[-+]?[0-9]+\b/ {15};
+int_const: /[-+]?[0-9]+\b/ {prefer};
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?(?<=[\w\.])(?![\w\.])/;
 char_const: /'[^']*'/;
 ellipsis: '...';
