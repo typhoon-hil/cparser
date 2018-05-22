@@ -32,3 +32,82 @@ def test_decl_after_if(parser):
 
     parser.parse(code)
 
+
+def test_for_loop_v1(parser):
+
+    code = """
+    
+    int main(int argc, const char **argv){
+        
+        int i;
+        for(i = 0; i < 10; i++) {
+        
+        }
+        
+    }
+    """
+
+    parser.parse(code)
+
+
+def test_for_loop_v2(parser):
+    """Tests parsing of for-loop without initialization."""
+
+    code = """
+
+    int main(int argc, const char **argv){
+
+        int i = 0;
+        for(; i < 10; i++) {
+
+        }
+
+    }
+    """
+
+    parser.parse(code)
+
+
+def test_for_loop_v3(parser):
+    """Tests parsing of for-loop without initialization and condition."""
+
+    code = """
+
+    int main(int argc, const char **argv){
+
+        int i = 0;
+        for(;; i++) {
+            if ( i < 10 ) {
+                break;
+            }
+        }
+
+    }
+    """
+
+    parser.parse(code)
+
+
+def test_for_loop_v4(parser):
+    """Tests parsing of the infinite for-loop."""
+
+    code = """
+
+    int main(int argc, const char **argv){
+
+        int i = 0;
+        for(;;) {
+            if ( i < 10 ) {
+                break;
+            }
+            
+            i++;
+        }
+
+    }
+    """
+
+    parser.parse(code)
+
+
+

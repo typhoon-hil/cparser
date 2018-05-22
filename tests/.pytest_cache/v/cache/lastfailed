@@ -1,0 +1,4 @@
+{
+  "test_examples.py::test_examples": true,
+  "test_examples.py::test_for_loop_c99": true
+}
