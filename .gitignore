@@ -9,6 +9,9 @@ __pycache__/
 # PyCharm
 .idea
 
+#Pytest
+*.pytest_cache/*
+
 # Distribution / packaging
 .Python
 env/
