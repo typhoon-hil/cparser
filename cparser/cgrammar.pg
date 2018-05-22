@@ -183,10 +183,13 @@ exp_stat                    : exp ';'
                             | ';'
                             ;
 
-compound_stat               : '{' decl_list stat_list '}'
-                            | '{' stat_list '}'
-                            | '{' decl_list '}'
-                            | '{' '}'
+block_item                  : decl | stat
+                            ;
+
+block_item_list             : block_item+
+                            ;
+
+compound_stat               : '{' block_item_list? '}'
                             ;
 
 stat_list                   : stat
