@@ -14,8 +14,10 @@ function_definition	        : decl_specs declarator decl_list compound_stat
                             | declarator compound_stat
                             ;
 
-decl                        : decl_specs init_declarator_list ';'
-                            | decl_specs ';'
+decl                        : decl_body ';'
+                            ;
+
+decl_body                   : decl_specs init_declarator_list?
                             ;
 
 decl_list                   : decl
@@ -179,8 +181,7 @@ labeled_stat                : id ':' stat
                             | 'default' ':' stat
                             ;
 
-exp_stat                    : exp ';'
-                            | ';'
+exp_stat                    : exp? ';'
                             ;
 
 block_item                  : decl | stat
@@ -204,6 +205,7 @@ selection_stat              : 'if' '(' exp ')' stat
 iteration_stat              : 'while' '(' exp ')' stat
                             | 'do' stat 'while' '(' exp ')' ';'
                             | 'for' '(' exp? ';' exp? ';' exp? ')' stat
+                            | 'for' '(' decl_body exp?';' exp? ';' exp? ')' stat
                             ;
 
 jump_stat                   : 'goto' id ';'

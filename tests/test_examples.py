@@ -110,4 +110,41 @@ def test_for_loop_v4(parser):
     parser.parse(code)
 
 
+def test_foor_without_braces(parser):
+    """Tests parsing of the for-loop without braces."""
 
+    code = """
+
+    int main(int argc, const char **argv){
+
+        int i;
+        int a = 0;
+        for(i = 0; i < 10; i++)
+           a = i * 2;
+
+    }
+    """
+
+    parser.parse(code)
+
+
+def test_for_loop_c99(parser):
+    """Tests parsing of C99 compatible for-loop."""
+
+    code = """
+
+        int main(int argc, const char **argv){
+            
+            int j;
+            for(int i = 0, j = 0;;) {
+                if ( i < 10 ) {
+                    break;
+                }
+
+                i++;
+            }
+
+        }
+        """
+
+    parser.parse(code)
