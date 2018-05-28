@@ -35,3 +35,13 @@ def test_struc_complex(parser):
 
     parser.parse(code)
 
+
+def test_typedef_int(parser):
+
+    code = """
+    typedef int INT_T;
+    
+    INT_T a = 0;
+    """
+
+    parser.parse(code)

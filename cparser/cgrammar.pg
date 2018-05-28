@@ -24,10 +24,10 @@ decl_list                   : decl
                             | decl_list decl
                             ;
 
-decl_specs                  : storage_class_spec decl_specs
-                            | storage_class_spec
-                            | type_spec decl_specs
-                            | type_spec
+decl_specs                  : storage_class_spec decl_specs {dynamic}
+                            | storage_class_spec {dynamic}
+                            | type_spec decl_specs {dynamic}
+                            | type_spec {dynamic}
                             | type_qualifier decl_specs
                             | type_qualifier
                             ;
@@ -166,7 +166,7 @@ direct_abstract_declarator  : '(' abstract_declarator ')'
                             | '('    ')'
                             ;
 
-typedef_name                : id;
+typedef_name                : id {dynamic};
 
 stat                        : labeled_stat
                             | exp_stat
