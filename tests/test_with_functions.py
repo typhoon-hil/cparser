@@ -30,6 +30,7 @@ def test_with_functions(parser):
 
     results = parser.parse(code)
     print("Parsed {} trees.".format(len(results)))
+
     trees_count = min(len(results), 10)
     for tree in range(trees_count):
         print('Dumping tree {}'.format(tree))
