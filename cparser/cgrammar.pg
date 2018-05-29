@@ -90,6 +90,7 @@ enum_spec                   : 'enum' id '{' enumerator_list '}'
                             ;
 
 enumerator_list             : enumerator
+                            | enumerator_list ','
                             | enumerator_list ',' enumerator
                             ;
 
