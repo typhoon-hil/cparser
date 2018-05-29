@@ -103,12 +103,16 @@ class CParser:
             "decl_body": decl_body
         }
 
-    def parse(self, code):
+    def parse(self, code, debug=False):
         """Parses the given code string."""
         self.user_defined_types = set()
+        self._glr.debug = debug
+
         return self._glr.parse(code)
 
-    def parse_file(self, file_path):
+    def parse_file(self, file_path, debug=False):
         """Parses content from the given file."""
         self.user_defined_types = set()
+        self._glr.debug = debug
+        
         return self._glr.parse_file(file_path)
