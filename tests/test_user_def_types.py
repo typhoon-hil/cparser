@@ -59,3 +59,58 @@ def test_typedef_stuct(parser):
     """
 
     parser.parse(code)
+
+
+def test_struct_pointer(parser):
+
+    code = """
+    struct Complex {
+        int x;
+        int y;
+    }
+    
+    int main() {
+        struct Complex *ptr;
+        
+        printf("Enter X: ");
+        scanf("%d", &(*ptr).x);
+
+        printf("Enter Y: ");
+        scanf("%d", &(*ptr).y);
+    
+        printf("Displaying: ");
+        printf("%d%d",(*ptr).age, (*ptr).weight);
+        
+        return 0;
+    }
+    
+    """
+
+    parser.parse(code)
+
+
+def test_enum(parser):
+
+    code = """
+    enum Status {
+        open,
+        closed
+    };
+    """
+
+    parser.parse(code)
+
+
+def test_typedef_enum(parser):
+
+    code = """
+    typedef enum {
+        kBLSUnchanged = 0,
+        kBLSChanged = 1,
+        kBLSDeleted = 2,
+    } BufhlLineStatus;
+    
+    BufhlLineStatus status;
+    """
+
+    parser.parse(code)
