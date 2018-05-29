@@ -148,3 +148,30 @@ def test_for_loop_c99(parser):
         """
 
     parser.parse(code)
+
+
+def test_uint(parser):
+
+    code = """
+    unsigned int state = 362436069U;
+    """
+
+    parser.parse(code)
+
+
+def test_long(parser):
+
+    code = """
+    int state = 362436069L;
+    """
+
+    parser.parse(code)
+
+
+def test_hex(parser):
+
+    code = """
+    int state = 0x0;
+    """
+
+    parser.parse(code)
