@@ -45,3 +45,17 @@ def test_typedef_int(parser):
     """
 
     parser.parse(code)
+
+
+def test_typedef_stuct(parser):
+
+    code = """
+    typedef struct {
+        int x;
+        int y;
+    } Complex;
+    
+    Complex c;
+    """
+
+    parser.parse(code)
