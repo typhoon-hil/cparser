@@ -9,8 +9,21 @@ def test_examples(parser):
 
     examples_path = os.path.join(root_path, "tests", "examples", "*.c")
 
+    example_idx = 0
+
     for example in glob.iglob(examples_path):
-        parser.parse_file(example)
+        print("Parsing: %s" % example)
+        results = parser.parse_file(example)
+
+        print("Number of trees: {}".format(len(results)))
+        trees_count = min(len(results), 10)
+
+        for tree in range(trees_count):
+            print('Dumping tree {}'.format(tree))
+            with open('{}_tree_{}.txt'.format(example_idx, tree), 'w') as f:
+                f.write(results[tree].tree_str())
+
+        example_idx += 1
 
 
 def test_decl_after_if(parser):
