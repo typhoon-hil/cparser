@@ -324,17 +324,20 @@ argument_exp_list           : assignment_exp
 cconst                      : int_const
                             | char_const
                             | float_const
+                            | hex_const
                          // | enumeration_const
                             ;
+
 
 //
 // Not part of the original grammar
 //
 
 terminals
-int_const: /[-+]?[0-9]+\b/ {prefer};
+int_const: /[-+]?[0-9]+[UL]?\b/ {prefer};
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?(?<=[\w\.])(?![\w\.])/;
 char_const: /'[^']*'/;
+hex_const: /0[xX][0-9a-fA-F]+/;
 ellipsis: '...';
 dot: '.';
 
