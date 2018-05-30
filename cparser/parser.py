@@ -41,7 +41,8 @@ class CParser:
         self._glr = GLRParser(grammar, build_tree=True,
                               call_actions_during_tree_build=True,
                               dynamic_filter=typedef_filter,
-                              actions=self._setup_actions())
+                              actions=self._setup_actions(),
+                              ws='\n\r\t ')
 
     def _setup_actions(self):
         """Creates a dict of semantic actions that will be called during
