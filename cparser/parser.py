@@ -18,7 +18,8 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        def typedef_filter(action, token, production, subresults, state):
+        def typedef_filter(action, token, production, subresults, state,
+                           context):
             """Filter for dynamic disambiguation
 
             Solves problems with typedef_name disambiguation. Whenever the
@@ -35,6 +36,12 @@ class CParser:
                 var_name = subresults[0].value
                 if var_name not in self.user_defined_types:
                     return False
+
+            if action is REDUCE and production.symbol.fqn == "primary_exp":
+                child = subresults[0]
+                if child.symbol.fqn == "id":
+                    if child.value in self.user_defined_types:
+                        return False
 
             return True
 

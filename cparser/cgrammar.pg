@@ -310,7 +310,7 @@ postfix_exp                 : primary_exp
                             | postfix_exp '--'
                             ;
 
-primary_exp                 : id
+primary_exp                 : id {dynamic}
                             | cconst
                             | string
                             | '(' exp ')'
