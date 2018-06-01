@@ -206,7 +206,7 @@ selection_stat              : 'if' '(' exp ')' stat
 iteration_stat              : 'while' '(' exp ')' stat
                             | 'do' stat 'while' '(' exp ')' ';'
                             | 'for' '(' exp? ';' exp? ';' exp? ')' stat
-                            | 'for' '(' decl_body exp?';' exp? ';' exp? ')' stat
+                            | 'for' '(' decl_body exp?';' exp? ';' exp? ')' stat {dynamic}
                             ;
 
 jump_stat                   : 'goto' id ';'
