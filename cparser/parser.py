@@ -43,6 +43,12 @@ class CParser:
                     if child.value in self.user_defined_types:
                         return False
 
+            if action is REDUCE and production.symbol.fqn == "iteration_stat":
+                if isrule(subresults[2], "decl_body"):
+                    init_declarator_list_opt = subresults[2].children[1]
+                    if len(init_declarator_list_opt.children) == 0:
+                        return False
+
             return True
 
         self._glr = GLRParser(grammar, build_tree=True,
@@ -58,12 +64,6 @@ class CParser:
         Returns:
             dict
         """
-        def isrule(non_term, rule_name):
-            """Helper function. Return `True` if given NodeNonTerm matches
-            has a given name."""
-            if isinstance(non_term, NodeNonTerm):
-                return non_term.production.symbol.fqn == rule_name
-            return False
 
         def decl_body(_, nodes):
             """Semantic action called for every decl_body production
@@ -124,3 +124,11 @@ class CParser:
         self._glr.debug = debug
         
         return self._glr.parse_file(file_path)
+
+
+def isrule(non_term, rule_name):
+    """Helper function. Return `True` if given NodeNonTerm matches
+    has a given name."""
+    if isinstance(non_term, NodeNonTerm):
+        return non_term.production.symbol.fqn == rule_name
+    return False
