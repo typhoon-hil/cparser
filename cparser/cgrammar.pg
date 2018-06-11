@@ -6,6 +6,12 @@ translation_unit            : external_decl
 
 external_decl               : function_definition
                             | decl
+                            | line_directive
+                            ;
+
+line_directive              : "#" int_const string
+                            | "#" int_const string int_const
+                            | "#" int_const string int_const int_const
                             ;
 
 function_definition	        : decl_specs declarator decl_list compound_stat
