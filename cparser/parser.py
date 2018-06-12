@@ -118,12 +118,19 @@ class CParser:
 
         return self._glr.parse(code)
 
-    def parse_file(self, file_path, debug=False):
+    def parse_file(self, file_path, use_cpp=False, cpp_path="cpp",
+                   cpp_args=None, debug=False):
         """Parses content from the given file."""
         self.user_defined_types = set()
         self._glr.debug = debug
-        
-        return self._glr.parse_file(file_path)
+
+        if use_cpp:
+            content = preprocess_file(file_path, cpp_path, cpp_args)
+        else:
+            with open(file_path) as f:
+                content = f.read()
+
+        return self._glr.parse(content)
 
 
 def isrule(non_term, rule_name):
@@ -132,3 +139,40 @@ def isrule(non_term, rule_name):
     if isinstance(non_term, NodeNonTerm):
         return non_term.production.symbol.fqn == rule_name
     return False
+
+
+def preprocess_file(file_path, cpp_path, cpp_args):
+    """Preprocess a file using C preprocessor
+
+    Args:
+        file_path (str): path to a file that is being parsed
+        cpp_path (str): path to a C preprocessor
+        cpp_args (list): list of args for the preprocessor
+    """
+    from subprocess import check_output
+
+    params = [cpp_path]
+    if isinstance(cpp_args, list):
+        params.extend(cpp_args)
+    elif cpp_args is None:
+        params.append(get_default_pp_args())
+
+    params.append(file_path)
+
+    try:
+        code = check_output(params, universal_newlines=True)
+    except OSError as e:
+        raise RuntimeError("Failed to invoke preprocessor!\n %s" % e)
+
+    return code
+
+
+def get_default_pp_args():
+    """Returns the default arg for the preprocessor in a format:
+
+    -I<path_to_the_fake_includes>
+    """
+    this_file = os.path.realpath(os.path.dirname(__file__))
+    root_path = os.path.split(os.path.abspath(os.path.join(this_file)))[0]
+    include_path = os.path.join(root_path, "utils", "fake_libc_include")
+    return "-I%s" % include_path
