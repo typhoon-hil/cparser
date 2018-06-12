@@ -124,3 +124,19 @@ def test_typedef_multiple(parser):
     """
 
     parser.parse(code)
+
+
+def test_typedef_with_ppline(parser):
+
+    code = """
+    typedef struct
+    {
+        int sh_name;
+        int sh_type;
+        # 201 "C:\\SmallerC\\v0100\\smlrl.c"
+        int sh_flags;
+    } Shd;
+    """
+
+    results = parser.parse(code)
+    print(results[0].tree_str())

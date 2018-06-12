@@ -72,6 +72,7 @@ init_declarator             : declarator
                             ;
 
 struct_decl                 : spec_qualifier_list struct_declarator_list ';'
+                            | line_directive
                             ;
 
 spec_qualifier_list         : type_spec spec_qualifier_list
