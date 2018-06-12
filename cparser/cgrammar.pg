@@ -347,7 +347,7 @@ hexadecimal                 : hex_const integer_suffix_opt?
 
 terminals
 integer_suffix_opt: /(([uU]ll)|([uU]LL)|(ll[uU]?)|(LL[uU]?)|([uU][lL])|([lL][uU]?)|[uU])?/;
-int_const: /[-+]?[0-9]+[UL]?\b/ {prefer};
+int_const: /[-+]?[0-9]+[uUlL]?\b/ {prefer};
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?(?<=[\w\.])(?![\w\.])/;
 char_const: /'[^']*'/;
 hex_const: /0[xX][0-9a-fA-F]+/;
