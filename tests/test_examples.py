@@ -264,3 +264,16 @@ def test_compound_expressions(parser):
     """
 
     parser.parse(code)
+
+
+def test_fnc_call_with_str(parser):
+
+    code = r"""
+    void main() {
+        char* p;
+        p = Malloc(sizeof ".\\");
+        strcpy(p, ".\\");
+    }
+    """
+
+    parser.parse(code)
