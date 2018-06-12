@@ -319,7 +319,7 @@ postfix_exp                 : primary_exp
 
 primary_exp                 : id {dynamic}
                             | cconst
-                            | string
+                            | adj_strings
                             | '(' exp ')'
                             ;
 
@@ -334,6 +334,8 @@ cconst                      : int_const
                             | hex_const
                          // | enumeration_const
                             ;
+
+adj_strings                 : string+;
 
 
 //
