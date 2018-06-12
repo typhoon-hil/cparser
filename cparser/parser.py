@@ -1,5 +1,6 @@
 import os
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE
+from parglare.common import Location
 
 
 class CParser:
@@ -71,6 +72,33 @@ class CParser:
             This semantic action is used to collect every user-defined type in
             a code. This includes structs, unions and typedefs.
             """
+            def collect_direct_decl_name(init_dcl):
+                """Adds the name of direct declarator into the set of
+                user-defined types"""
+                declarator = init_dcl.children[0]
+
+                if isrule(declarator.children[0], "direct_declarator"):
+                    direct_declarator = declarator.children[0]
+                else:
+                    # in case of pointer, declarator is a second
+                    # child
+                    direct_declarator = declarator.children[1]
+
+                if isinstance(direct_declarator.children[0], NodeTerm):
+                    value = direct_declarator.children[0].value
+                    self.user_defined_types.add(value)
+
+            def recurse_init_decl(init_dcl):
+                """Recurses through the init declarator rule."""
+                if len(init_dcl.children) > 1:
+
+                    # last child is always direct declarator
+                    collect_direct_decl_name(init_dcl.children[-1])
+                    # first child is always recursive init_declarator_1_comma
+                    recurse_init_decl(init_dcl.children[0])
+                else:
+                    collect_direct_decl_name(init_dcl.children[0])
+
             decl_specs = nodes[0]
 
             first_el = decl_specs.children[0]
@@ -85,18 +113,7 @@ class CParser:
 
                     init_decl_list = init_decl_list_opt.children[0]
                     for init_decl in init_decl_list.children:
-                        declarator = init_decl.children[0]
-
-                        if isrule(declarator.children[0], "direct_declarator"):
-                            direct_declarator = declarator.children[0]
-                        else:
-                            # in case of pointer, declarator is a second
-                            # child
-                            direct_declarator = declarator.children[1]
-
-                        if isinstance(direct_declarator.children[0], NodeTerm):
-                            value = direct_declarator.children[0].value
-                            self.user_defined_types.add(value)
+                        recurse_init_decl(init_decl)
 
             # Productions that start with type_spec
             if isrule(first_el, "type_spec"):
