@@ -241,3 +241,26 @@ def test_adjacent_strings(parser):
     """
 
     parser.parse(code)
+
+
+def test_compound_expressions(parser):
+
+    code = r"""
+    int escape(char* in){
+        int slashes = 0;
+        
+        while ((c = *in++) != '\0')
+        {
+            if (c == '\\')
+            {
+                do {
+                    slashes++;
+                } while ((c = *in++) == '\\');
+            }
+        }
+        
+        return slashes;
+    }
+    """
+
+    parser.parse(code)
