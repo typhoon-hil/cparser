@@ -222,3 +222,13 @@ def test_pp_line_in_stat(parser):
 
     parser.parse(code)
 
+
+def test_adjacent_strings(parser):
+
+    code = """
+    void main(){
+        printf("DEAD""BEEF");
+    }
+    """
+
+    parser.parse(code)
