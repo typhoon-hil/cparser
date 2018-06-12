@@ -181,6 +181,7 @@ stat                        : labeled_stat
                             | selection_stat
                             | iteration_stat
                             | jump_stat
+                            | line_directive
                             ;
 
 labeled_stat                : id ':' stat

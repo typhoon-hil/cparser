@@ -188,3 +188,37 @@ def test_hex(parser):
     """
 
     parser.parse(code)
+
+
+def test_negation(parser):
+
+    code = """
+    unsigned truncUint(int sizeOfWord, unsigned n)
+    {
+        
+      if (sizeOfWord == 2)
+        n &= ~(~0u << 8 << 8);
+
+      else if (sizeOfWord == 4)
+        n &= ~(~0u << 8 << 12 << 12);
+
+      return n;
+    }
+    """
+
+    parser.parse(code)
+
+
+def test_pp_line_in_stat(parser):
+
+    code = """
+    void loop(int n) {
+        for(int i = 0; i < n; i++){
+            
+        }
+        # 1 "C:\\cparser\\utils\\math.h"
+    }
+    """
+
+    parser.parse(code)
+
