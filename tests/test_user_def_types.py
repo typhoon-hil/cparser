@@ -114,3 +114,13 @@ def test_typedef_enum(parser):
     """
 
     parser.parse(code)
+
+
+def test_typedef_multiple(parser):
+
+    code = """
+    typedef unsigned char uchar, uchar2, uint8;
+    typedef signed char schar, int8;
+    """
+
+    parser.parse(code)
