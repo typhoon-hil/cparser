@@ -331,11 +331,14 @@ argument_exp_list           : assignment_exp
 cconst                      : int_const
                             | char_const
                             | float_const
-                            | hex_const
+                            | hexadecimal
                          // | enumeration_const
                             ;
 
 adj_strings                 : string+;
+
+hexadecimal                 : hex_const integer_suffix_opt?
+                            ;
 
 
 //
@@ -343,6 +346,7 @@ adj_strings                 : string+;
 //
 
 terminals
+integer_suffix_opt: /(([uU]ll)|([uU]LL)|(ll[uU]?)|(LL[uU]?)|([uU][lL])|([lL][uU]?)|[uU])?/;
 int_const: /[-+]?[0-9]+[UL]?\b/ {prefer};
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?(?<=[\w\.])(?![\w\.])/;
 char_const: /'[^']*'/;

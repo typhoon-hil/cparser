@@ -190,6 +190,15 @@ def test_hex(parser):
     parser.parse(code)
 
 
+def test_hex_with_u_suffix(parser):
+
+    code = """
+    int state = 0xFFu;
+    """
+
+    parser.parse(code)
+
+
 def test_negation(parser):
 
     code = """
