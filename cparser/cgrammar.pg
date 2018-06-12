@@ -64,8 +64,7 @@ struct_decl_list            : struct_decl
                             | struct_decl_list struct_decl
                             ;
 
-init_declarator_list        : init_declarator
-                            | init_declarator_list ',' init_declarator
+init_declarator_list        : init_declarator+[comma]
                             ;
 
 init_declarator             : declarator
@@ -82,7 +81,7 @@ spec_qualifier_list         : type_spec spec_qualifier_list
                             ;
 
 struct_declarator_list      : struct_declarator
-                            | struct_declarator_list ',' struct_declarator
+                            | struct_declarator_list comma struct_declarator
                             ;
 
 struct_declarator           : declarator
@@ -96,8 +95,8 @@ enum_spec                   : 'enum' id '{' enumerator_list '}'
                             ;
 
 enumerator_list             : enumerator
-                            | enumerator_list ','
-                            | enumerator_list ',' enumerator
+                            | enumerator_list comma
+                            | enumerator_list comma enumerator
                             ;
 
 enumerator                  : id
@@ -128,11 +127,11 @@ type_qualifier_list         : type_qualifier
                             ;
 
 param_type_list             : param_list
-                            | param_list ',' ellipsis
+                            | param_list comma ellipsis
                             ;
 
 param_list                  : param_decl
-                            | param_list ',' param_decl
+                            | param_list comma param_decl
                             ;
 
 param_decl                  : decl_specs declarator
@@ -141,16 +140,16 @@ param_decl                  : decl_specs declarator
                             ;
 
 id_list                     : id
-                            | id_list ',' id
+                            | id_list comma id
                             ;
 
 initializer                 : assignment_exp
                             | '{' initializer_list '}'
-                            | '{' initializer_list ',' '}'
+                            | '{' initializer_list comma '}'
                             ;
 
 initializer_list            : initializer
-                            | initializer_list ',' initializer
+                            | initializer_list comma initializer
                             ;
 
 type_name                   : spec_qualifier_list abstract_declarator
@@ -223,7 +222,7 @@ jump_stat                   : 'goto' id ';'
                             ;
 
 exp                         : assignment_exp
-                            | exp ',' assignment_exp
+                            | exp comma assignment_exp
                             ;
 
 assignment_exp              : conditional_exp
@@ -323,7 +322,7 @@ primary_exp                 : id {dynamic}
                             ;
 
 argument_exp_list           : assignment_exp
-                            | argument_exp_list ',' assignment_exp
+                            | argument_exp_list comma assignment_exp
                             ;
 
 
@@ -346,7 +345,7 @@ char_const: /'[^']*'/;
 hex_const: /0[xX][0-9a-fA-F]+/;
 ellipsis: '...';
 dot: '.';
-
+comma: ',';
 
 string: /("(\\"|[^"])*")|(\'(\\\'|[^\'])*\')/;
 id: /[_a-zA-Z][_a-zA-Z0-9]*/;
