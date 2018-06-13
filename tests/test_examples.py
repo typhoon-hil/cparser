@@ -181,6 +181,24 @@ def test_long(parser):
     parser.parse(code)
 
 
+def test_unsigned_long(parser):
+
+    code = """
+    unsigned long ul65536 = 65536UL;
+    """
+
+    parser.parse(code)
+
+
+def test_float(parser):
+
+    code = """
+    float state = 0.0f;
+    """
+
+    parser.parse(code)
+
+
 def test_hex(parser):
 
     code = """
