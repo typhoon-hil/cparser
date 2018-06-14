@@ -163,6 +163,21 @@ def test_for_loop_c99(parser):
     parser.parse(code)
 
 
+def test_pp_in_loop(parser):
+
+    code = """
+    void main(){
+        int sum = 0;
+        for(int i = 0; i < 10; i++){
+            # 2 "some fictive path"
+            sum =+ 1;
+        }
+    }
+    """
+
+    parser.parse(code)
+
+
 def test_uint(parser):
 
     code = """
@@ -279,6 +294,30 @@ def test_compound_expressions(parser):
         
         return slashes;
     }
+    """
+
+    parser.parse(code)
+
+
+def test_array(parser):
+
+    code = """
+    int cases[] = {
+          # 1 "C:\\some\\path\\scanf.c"
+          { 1, 2, 3, 4 },
+          # 2 "C:\\some\\path\\math.h"
+          { 5, 6, 7, 8 },
+    };
+    """
+
+    parser.parse(code)
+
+
+def test_slash_in_char(parser):
+
+    code = r"""
+    char a = '\'';
+    char b = '"';
     """
 
     parser.parse(code)

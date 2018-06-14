@@ -14,7 +14,7 @@ line_directive              : "#" int_const string
                             | "#" int_const string int_const int_const
                             ;
 
-function_definition	        : decl_specs declarator decl_list compound_stat
+function_definition         : decl_specs declarator decl_list compound_stat
                             | declarator decl_list compound_stat
                             | decl_specs declarator compound_stat
                             | declarator compound_stat
@@ -149,8 +149,8 @@ initializer                 : assignment_exp
                             | '{' initializer_list comma '}'
                             ;
 
-initializer_list            : initializer
-                            | initializer_list comma initializer
+initializer_list            : line_directive? initializer
+                            | initializer_list comma line_directive? initializer
                             ;
 
 type_name                   : spec_qualifier_list abstract_declarator
@@ -349,7 +349,7 @@ terminals
 integer_suffix_opt: /(([uU]ll)|([uU]LL)|(ll[uU]?)|(LL[uU]?)|([uU][lL])|([lL][uU]?)|[uU])?/;
 int_const: /[-+]?[0-9]+[uUlL]{0,2}\b/ {prefer};
 float_const: /[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?[FfLl]?(?<=[\w\.])(?![\w\.])/;
-char_const: /'[^']*'/;
+char_const: /'([^'\\\n]|(\\(([a-zA-Z._~!=&\^\-\\?'"])|(\d+)|(x[0-9a-fA-F]+))))'/;
 hex_const: /0[xX][0-9a-fA-F]+/;
 ellipsis: '...';
 dot: '.';
