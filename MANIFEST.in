@@ -1,0 +1,2 @@
+recursive-include cparser *.py *.pg
+recursive-include utils *.h
