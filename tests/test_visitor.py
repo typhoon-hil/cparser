@@ -96,7 +96,7 @@ def test_id_renaming(parser):
             self.found_ids = []
 
         def visit_id(self, node):
-            node.value = "new_%s" % node.value
+            node.token.value = "new_%s" % node.token.value
             return node
 
     # Rename all identifiers.

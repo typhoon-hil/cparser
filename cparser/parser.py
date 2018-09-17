@@ -19,8 +19,7 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        def typedef_filter(action, token, production, subresults, state,
-                           context):
+        def typedef_filter(context, action, subresults):
             """Filter for dynamic disambiguation
 
             Solves problems with typedef_name disambiguation. Whenever the
@@ -31,6 +30,8 @@ class CParser:
             """
             if action is None:
                 return
+
+            production = context.production
 
             if action is REDUCE and production.symbol.fqn == "typedef_name":
 
