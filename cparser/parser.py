@@ -134,13 +134,14 @@ class CParser:
         self.user_defined_types = set()
         self._glr.debug = debug
 
-        return self._glr.parse(code)
+        results = self._glr.parse(code)
+        return results[0]
 
     def parse_file(self, file_path, use_cpp=False, cpp_path="cpp",
                    cpp_args=None, debug=False):
         """Parses content from the given file."""
-        self.user_defined_types = set()
-        self._glr.debug = debug
+        # self.user_defined_types = set()
+        # self._glr.debug = debug
 
         if use_cpp:
             content = preprocess_file(file_path, cpp_path, cpp_args)
@@ -148,7 +149,7 @@ class CParser:
             with open(file_path) as f:
                 content = f.read()
 
-        return self._glr.parse(content)
+        return self.parse(content)
 
 
 def isrule(non_term, rule_name):
