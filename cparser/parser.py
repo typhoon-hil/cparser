@@ -149,7 +149,7 @@ class CParser:
             with open(file_path) as f:
                 content = f.read()
 
-        return self.parse(content)
+        return self.parse(content, debug)
 
 
 def isrule(non_term, rule_name):
