@@ -33,10 +33,8 @@ def test_generator(parser):
     }
     
     """
-    results = parser.parse(code)
-
-    ast = results[0]
+    ast = parser.parse(code)
 
     generator = CodeGenerator()
-    code = generator.generate(ast, id_prefix="new_", debug=True)
+    code = generator.generate(ast, debug=True)
     print(code)
