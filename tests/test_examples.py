@@ -13,15 +13,7 @@ def test_examples(parser):
 
     for example in glob.iglob(examples_path):
         print("Parsing: %s" % example)
-        results = parser.parse_file(example)
-
-        print("Number of trees: {}".format(len(results)))
-        trees_count = min(len(results), 10)
-
-        for tree in range(trees_count):
-            print('Dumping tree {}'.format(tree))
-            with open('{}_tree_{}.txt'.format(example_idx, tree), 'w') as f:
-                f.write(results[tree].tree_str())
+        parser.parse_file(example)
 
         example_idx += 1
 

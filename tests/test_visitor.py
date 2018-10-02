@@ -16,7 +16,7 @@ def test_id_visitor(parser):
     typedef Complex complex_type;
     """
 
-    results = parser.parse(code)
+    ast = parser.parse(code)
 
     class IDVisitor(ASTVisitor):
 
@@ -29,7 +29,7 @@ def test_id_visitor(parser):
             return node
 
     visitor = IDVisitor()
-    visitor.visit(results[0])
+    visitor.visit(ast)
     assert len(visitor.found_ids) == 7
 
 
@@ -48,7 +48,7 @@ def test_struct_or_union_spec(parser):
     typedef Complex complex_type;
     """
 
-    results = parser.parse(code)
+    ast = parser.parse(code)
 
     class StructVisitor(ASTVisitor):
 
@@ -61,7 +61,7 @@ def test_struct_or_union_spec(parser):
             return node
 
     visitor = StructVisitor()
-    visitor.visit(results[0])
+    visitor.visit(ast)
 
     assert len(visitor.found_structs) == 2
 
@@ -77,7 +77,7 @@ def test_id_renaming(parser):
 
     Atom helium;
     """
-    results = parser.parse(code)
+    ast = parser.parse(code)
 
     class IDVisitor(ASTVisitor):
         """Visitor that collects all identifiers in the code."""
@@ -101,7 +101,7 @@ def test_id_renaming(parser):
 
     # Rename all identifiers.
     rename_visitor = RenameIDVisitor()
-    ast = rename_visitor.visit(results[0])
+    ast = rename_visitor.visit(ast)
 
     # Collect all identifiers and check if they're renamed.
     check_visitor = IDVisitor()

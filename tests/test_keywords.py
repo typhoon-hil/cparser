@@ -29,6 +29,5 @@ def test_recognizers(parser):
     
     """
 
-    results = parser.parse(code)
-    print("Number of trees: {}".format(len(results)))
-    print(results[0].tree_str())
+    ast = parser.parse(code)
+    print(ast.tree_str())

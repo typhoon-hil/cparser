@@ -138,5 +138,5 @@ def test_typedef_with_ppline(parser):
     } Shd;
     """
 
-    results = parser.parse(code)
-    print(results[0].tree_str())
+    ast = parser.parse(code)
+    print(ast.tree_str())
