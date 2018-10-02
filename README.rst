@@ -7,12 +7,15 @@ a pure Python scannerless LR/GLR parser.
 Introduction
 ============
 
-TODO
+**cparser** is a parser for C language.
 
 Installation
 ============
 
-TODO
+To install Typhoon HIL API library use:
+.. code:: shell
+
+    $ pip install cparser
 
 Licence
 =======
