@@ -57,6 +57,9 @@ class CodeGenerator(ASTVisitor):
     def visit_struct_or_union_spec(self, node):
         return " ".join(self.visit(c) for c in node.children)
 
+    def visit_enum_spec(self, node):
+        return " ".join(self.visit(c) for c in node.children)
+
     # def visit_struct_declarator_list(self, node):
     #     if len(node.children) != 1:
     #         ret = self.visit(node.children[0])
