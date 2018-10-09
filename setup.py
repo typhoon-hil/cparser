@@ -19,6 +19,7 @@ setup(
     install_requires=["parglare"],
     tests_require=["pytest"],
     author="Typhoon HIL, Inc",
+    url="https://github.com/typhoon-hil/cparser",
     include_package_data=True,
     packages=find_packages(),
     keywords="parser C GLR",
