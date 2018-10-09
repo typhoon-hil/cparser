@@ -1,5 +1,4 @@
-A C parser based on parglare_ -
-a pure Python scannerless LR/GLR parser.
+A C parser based on `parglare <https://github.com/igordejanovic/parglare/>`_ - a pure Python scannerless LR/GLR parser.
 
 Quick intro
 -----------
@@ -68,6 +67,3 @@ Python versions
 ---------------
 
 Tested with 2.7, 3.4-3.6
-
-
-.. _parglare: https://github.com/igordejanovic/parglare
