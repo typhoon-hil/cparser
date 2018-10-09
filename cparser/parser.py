@@ -1,6 +1,5 @@
 import os
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE
-from parglare.common import Location
 
 
 class CParser:
@@ -19,14 +18,30 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        def typedef_filter(context, action, subresults):
+        def dynamic_disambig_filter(context, action, subresults):
             """Filter for dynamic disambiguation
 
-            Solves problems with typedef_name disambiguation. Whenever the
-            REDUCE is called on typedef_name rule, we first check if the
-            ID that is trying to be reduced is actually a user-defined type
-            (struct, union, typedef). If yes, than the REDUCE will be called.
+            Solves problems with following disambiguations:
+                * typedef_name
+                * primary_exp
+                * iteration_stat
 
+            typedef_name & primary_exp disambiguations
+            ------------------------------------------
+            Whenever the REDUCE is called on typedef_name or primary_exp rule,
+            we first check if the ID that is trying to be reduced is actually a
+            user-defined type (struct, union, typedef). If yes, than the REDUCE
+            will be called.
+
+            iteration_stat disambiguation
+            -----------------------------
+            Handles the case where for loop contains declarations inside init
+            block. For example:
+                for (int i = 0; ...)
+
+            Disambiguity happens because part `i = 0` can be recognized
+            both as exp_opt and init_declarator_list_opt. In this case, part
+            `i = 0` is always reduced to init_declarator_list_opt rule.
             """
             if action is None:
                 return
@@ -55,7 +70,7 @@ class CParser:
 
         self._glr = GLRParser(grammar, build_tree=True,
                               call_actions_during_tree_build=True,
-                              dynamic_filter=typedef_filter,
+                              dynamic_filter=dynamic_disambig_filter,
                               actions=self._setup_actions(),
                               ws='\n\r\t ')
 
