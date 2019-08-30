@@ -10,8 +10,11 @@ external_decl               : function_definition
                             ;
 
 line_directive              : "#" int_const string
-                            | "#" int_const string int_const
-                            | "#" int_const string int_const int_const
+                            | "#" int_const string line_directive_int
+                            ;
+
+line_directive_int          : int_const
+                            | line_directive int_const
                             ;
 
 function_definition         : decl_specs declarator decl_list compound_stat
