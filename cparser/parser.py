@@ -175,7 +175,7 @@ def isrule(non_term, rule_name):
     return False
 
 
-def preprocess_file(file_path, cpp_path, cpp_args):
+def preprocess_file(file_path, cpp_path, cpp_args=None):
     """Preprocess a file using C preprocessor
 
     Args:
@@ -183,20 +183,35 @@ def preprocess_file(file_path, cpp_path, cpp_args):
         cpp_path (str): path to a C preprocessor
         cpp_args (list): list of args for the preprocessor
     """
-    from subprocess import check_output
+    import subprocess
+    import tempfile
 
-    params = [cpp_path]
-    if isinstance(cpp_args, list):
-        params.extend(cpp_args)
+    cwd = os.path.dirname(os.path.realpath(file_path))
+    command = [cpp_path]
+
+    if cpp_args and isinstance(cpp_args, list):
+        command.extend(cpp_args)
     elif cpp_args is None:
-        params.append(get_default_pp_args())
+        command.append(get_default_pp_args())
 
-    params.append(file_path)
+    command.append(file_path)
 
-    try:
-        code = check_output(params, universal_newlines=True)
-    except OSError as e:
-        raise RuntimeError("Failed to invoke preprocessor!\n %s" % e)
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".c") as f:
+        command.extend(["-o", f.name])
+
+        # do not show command prompt when running subprocess on Windows.
+        params = dict()
+        if os.name == 'nt':
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            params['startupinfo'] = startupinfo
+
+        try:
+            subprocess.run(command, cwd=cwd, **params)
+        except Exception as e:
+            raise RuntimeError("Failed to invoke preprocessor!\n %s" % e)
+
+        code = f.read()
 
     return code
 
