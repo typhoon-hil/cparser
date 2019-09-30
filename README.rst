@@ -1,3 +1,4 @@
+
 A C parser based on `parglare <https://github.com/igordejanovic/parglare/>`_ - a pure Python scannerless LR/GLR parser.
 
 Quick intro
@@ -6,7 +7,7 @@ Quick intro
 **cparser** is a parser for C language. This example shows how to
 collect all IDs from a simple C code.
 
-.. code-block:: python
+.. code:: python
 
     from cparser import CParser
     from cparser.visitor import ASTVisitor

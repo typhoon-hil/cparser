@@ -14,6 +14,7 @@ setup(
     name=NAME,
     description=DESCRIPTION,
     long_description=README,
+    long_description_content_type="text/x-rst",
     version=get_version(),
     license="MIT",
     install_requires=["parglare"],
@@ -28,7 +29,6 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development",
         'Topic :: Software Development :: Libraries :: Python Modules',
-        "License :: OSI Approved :: MIT Licence",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
     ]
