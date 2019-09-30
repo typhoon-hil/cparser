@@ -21,7 +21,7 @@ def test_id_visitor(parser):
     class IDVisitor(ASTVisitor):
 
         def __init__(self):
-            super().__init__()
+            super(IDVisitor, self).__init__()
             self.found_ids = []
 
         def visit_id(self, node):
@@ -53,7 +53,7 @@ def test_struct_or_union_spec(parser):
     class StructVisitor(ASTVisitor):
 
         def __init__(self):
-            super().__init__()
+            super(StructVisitor, self).__init__()
             self.found_structs = []
 
         def visit_struct_or_union_spec(self, node):
@@ -82,7 +82,7 @@ def test_id_renaming(parser):
     class IDVisitor(ASTVisitor):
         """Visitor that collects all identifiers in the code."""
         def __init__(self):
-            super().__init__()
+            super(IDVisitor, self).__init__()
             self.found_ids = []
 
         def visit_id(self, node):
@@ -92,7 +92,7 @@ def test_id_renaming(parser):
     class RenameIDVisitor(ASTVisitor):
         """Visitor that renames all identifiers in the code."""
         def __init__(self):
-            super().__init__()
+            super(RenameIDVisitor, self).__init__()
             self.found_ids = []
 
         def visit_id(self, node):

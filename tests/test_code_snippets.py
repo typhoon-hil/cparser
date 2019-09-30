@@ -2,16 +2,16 @@ import os
 import glob
 
 
-def test_examples(parser):
+def test_code_snippets(parser):
 
     this_file = os.path.realpath(os.path.dirname(__file__))
     root_path = os.path.split(os.path.abspath(os.path.join(this_file)))[0]
 
-    examples_path = os.path.join(root_path, "tests", "examples", "*.c")
+    snippets_path = os.path.join(root_path, "tests", "code_snippets", "*.c")
 
     example_idx = 0
 
-    for example in glob.iglob(examples_path):
+    for example in glob.iglob(snippets_path):
         print("Parsing: %s" % example)
         parser.parse_file(example)
 

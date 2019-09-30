@@ -1,5 +1,5 @@
 
-class ASTVisitor:
+class ASTVisitor(object):
     """A base class for visiting AST nodes
 
     In order to define custom visitors, subclass ASTVisitor and define

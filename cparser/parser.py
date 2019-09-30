@@ -196,23 +196,38 @@ def preprocess_file(file_path, cpp_path, cpp_args=None):
 
     command.append(file_path)
 
-    with tempfile.NamedTemporaryFile(mode="w+", suffix=".c") as f:
-        command.extend(["-o", f.name])
+    f = tempfile.NamedTemporaryFile(mode="w+", suffix=".c", delete=False)
+    command.extend(["-o", f.name])
 
-        # do not show command prompt when running subprocess on Windows.
-        params = dict()
-        if os.name == 'nt':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            params['startupinfo'] = startupinfo
+    # do not show command prompt when running subprocess on Windows.
+    params = dict()
+    if os.name == 'nt':
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        params['startupinfo'] = startupinfo
 
-        try:
-            subprocess.run(command, cwd=cwd, **params)
-        except Exception as e:
-            raise RuntimeError("Failed to invoke preprocessor!\n %s" % e)
+    p = subprocess.Popen(
+        command, 
+        cwd=cwd, 
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        **params
+    )
+    _, sterr = p.communicate()
+    sterr = sterr.decode(encoding="utf-8")
+    retcode = p.returncode
+    
 
-        code = f.read()
-
+    if sterr != "" or retcode != 0:
+        f.close()
+        os.unlink(f.name)
+        raise RuntimeError("Failed to invoke preprocessor! %s" % sterr)
+    
+    code = f.read()
+    f.close()
+    os.unlink(f.name)
+    
     return code
 
 

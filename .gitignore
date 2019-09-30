@@ -69,3 +69,6 @@ target/
 
 # Ignore cached grammar
 cparser/cgrammar.pgt
+
+# Visual Studio Code
+.vscode/
