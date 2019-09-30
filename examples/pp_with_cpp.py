@@ -18,16 +18,21 @@ int main() {
 """
 
 
-cparser = CParser()
-f = tempfile.NamedTemporaryFile("w+", suffix=".c", delete=False)
+def main():
+    cparser = CParser()
+    f = tempfile.NamedTemporaryFile("w+", suffix=".c", delete=False)
 
-try:
-    f.write(code)
-    f.flush()
+    try:
+        f.write(code)
+        f.flush()
 
-    pp_code = preprocess_file(f.name, cpp_path="cpp")
-    ast = cparser.parse(pp_code)
-finally:
-    f.close()
-    os.unlink(f.name)
+        pp_code = preprocess_file(f.name, cpp_path="cpp")
+        ast = cparser.parse(pp_code)
+    finally:
+        f.close()
+        os.unlink(f.name)
+
+
+if __name__ == "__main__":
+    main()
 

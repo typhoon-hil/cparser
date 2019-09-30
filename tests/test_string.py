@@ -10,7 +10,7 @@ def test_fnc_call_with_str(parser):
     }
     """
 
-    parser.parse(code, debug=True)
+    parser.parse(code)
 
 
 def test_empty(parser):

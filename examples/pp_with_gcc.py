@@ -1,6 +1,8 @@
+import os
+import tempfile
 from cparser import CParser
 from cparser.parser import preprocess_file, get_default_pp_args
-import tempfile
+
 
 code = """
 #include <stdio.h>
@@ -16,14 +18,24 @@ int main() {
 """
 
 
-cparser = CParser()
-with tempfile.NamedTemporaryFile("w+", suffix=".c") as f:
-    f.write(code)
-    f.flush()
+def main():
+    cparser = CParser()
+    f = tempfile.NamedTemporaryFile("w+", suffix=".c", delete=False)
+    
+    try:
+        f.write(code)
+        f.flush()
 
-    pp_code = preprocess_file(
-        f.name,
-        cpp_path="gcc",
-        cpp_args=["-E", get_default_pp_args()]
-    )
-    ast = cparser.parse(pp_code)
+        pp_code = preprocess_file(
+            f.name,
+            cpp_path="gcc",
+            cpp_args=["-E", get_default_pp_args()]
+        )
+        ast = cparser.parse(pp_code)
+    finally:
+        f.close()
+        os.unlink(f.name)
+
+
+if __name__ == "__main__":
+    main()
