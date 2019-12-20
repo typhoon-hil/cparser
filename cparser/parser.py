@@ -72,7 +72,7 @@ class CParser:
                               call_actions_during_tree_build=True,
                               dynamic_filter=dynamic_disambig_filter,
                               actions=self._setup_actions(),
-                              ws='\n\r\t ')
+                              lexical_disambiguation=True)
 
     def _setup_actions(self):
         """Creates a dict of semantic actions that will be called during
@@ -207,8 +207,8 @@ def preprocess_file(file_path, cpp_path, cpp_args=None):
         params['startupinfo'] = startupinfo
 
     p = subprocess.Popen(
-        command, 
-        cwd=cwd, 
+        command,
+        cwd=cwd,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -217,17 +217,16 @@ def preprocess_file(file_path, cpp_path, cpp_args=None):
     _, sterr = p.communicate()
     sterr = sterr.decode(encoding="utf-8")
     retcode = p.returncode
-    
 
     if sterr != "" or retcode != 0:
         f.close()
         os.unlink(f.name)
         raise RuntimeError("Failed to invoke preprocessor! %s" % sterr)
-    
+
     code = f.read()
     f.close()
     os.unlink(f.name)
-    
+
     return code
 
 
