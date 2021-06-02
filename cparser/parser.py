@@ -18,7 +18,8 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        def dynamic_disambig_filter(context, action, subresults):
+        def dynamic_disambig_filter(context, from_state, to_state, action,
+                                    production=None, subresults=None):
             """Filter for dynamic disambiguation
 
             Solves problems with following disambiguations:
