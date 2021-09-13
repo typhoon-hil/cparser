@@ -14,7 +14,7 @@ line_directive              : "#" int_const string
                             ;
 
 line_directive_int          : int_const
-                            | line_directive int_const
+                            | line_directive_int int_const
                             ;
 
 function_definition         : decl_specs declarator decl_list compound_stat
@@ -48,6 +48,7 @@ storage_class_spec          : 'auto' | 'register' | 'static' | 'extern' | 'typed
 type_spec                   : 'void' | 'char' | 'short' | 'int' | 'long' | 'float'
                             | 'double' | 'signed' | 'unsigned'
                             | '_Bool' // _Bool is built-in type in C99
+                            | '_Complex' // _Complex is built-in type in C99
                             | struct_or_union_spec
                             | enum_spec
                             | typedef_name
