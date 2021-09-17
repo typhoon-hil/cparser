@@ -6,7 +6,7 @@ def get_version():
     Return C parser version. Used in setup.py and anywhere
     where version is needed.
     """
-    return "0.1.3"
+    return "0.1.4"
 
 
 __version__ = get_version()
