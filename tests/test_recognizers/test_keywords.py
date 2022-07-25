@@ -1,5 +1,8 @@
+import os
+from tests.utils import check_or_update
 
-def test_recognizers(parser):
+
+def test_recognizers(parser, update):
     code = """
     typedef int int8_t;
 
@@ -29,5 +32,8 @@ def test_recognizers(parser):
     
     """
 
-    ast = parser.parse(code)
-    print(ast.to_str())
+    tree = parser.parse(code)
+
+    file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                             "test_recognizers.tree")
+    check_or_update(update, tree, file_path)
