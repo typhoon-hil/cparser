@@ -139,4 +139,4 @@ def test_typedef_with_ppline(parser):
     """
 
     ast = parser.parse(code)
-    print(ast.tree_str())
+    print(ast.to_str())

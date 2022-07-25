@@ -30,4 +30,4 @@ def test_recognizers(parser):
     """
 
     ast = parser.parse(code)
-    print(ast.tree_str())
+    print(ast.to_str())

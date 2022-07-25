@@ -25,7 +25,7 @@ class CodeGenerator(ASTVisitor):
         if not node:
             return ""
 
-        if hasattr(node, "children"):
+        if hasattr(node, "children") and node.children is not None:
             return "".join(self.visit(c) for c in node.children)
         else:
             return node.value

@@ -1,5 +1,5 @@
 import os
-from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE
+from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
 
 class CParser:
@@ -70,7 +70,6 @@ class CParser:
 
         self._glr = GLRParser(grammar, build_tree=True,
                               call_actions_during_tree_build=True,
-                              dynamic_filter=dynamic_disambig_filter,
                               actions=self._setup_actions(),
                               lexical_disambiguation=True)
 
@@ -82,7 +81,7 @@ class CParser:
             dict
         """
 
-        def decl_body(_, nodes):
+        def decl_body(context, nodes):
             """Semantic action called for every decl_body production
 
             This semantic action is used to collect every user-defined type in
@@ -115,9 +114,15 @@ class CParser:
                 else:
                     collect_direct_decl_name(init_dcl.children[0])
 
-            decl_specs = nodes[0]
+            first_el = nodes[0]
+            if isinstance(first_el, list):
+                if first_el[0] == "typedef":
+                    name_spec = nodes[-1][0]
+                    name = name_spec[-1] if isinstance(name_spec, list) else name_spec
+                    self.user_defined_types.add(name)
+                if first_el[0] in {"struct", "union"}:
+                    self.user_defined_types.add(first_el[1])
 
-            first_el = decl_specs.children[0]
             if isrule(first_el, "storage_class_spec"):
 
                 if first_el.children[0].value == "typedef":
@@ -149,15 +154,28 @@ class CParser:
         self.user_defined_types = set()
         self._glr.debug = debug
 
-        results = self._glr.parse(code)
-        return results[0]
+        forest = self._glr.parse(code)
+
+        if debug:
+            with open("debug.dot", "w") as f:
+                f.write(forest.to_dot())
+
+        # Collect user-defined types
+        self._glr.call_actions(forest[0])
+
+        # Call disambiguate here
+        forest.disambiguate(self.disambiguate)
+
+        if debug:
+            with open("debug2.dot", "w") as f:
+                f.write(forest.to_dot())
+
+        assert len(forest) == 1
+        return forest[0]
 
     def parse_file(self, file_path, use_cpp=False, cpp_path="cpp",
                    cpp_args=None, debug=False):
         """Parses content from the given file."""
-        # self.user_defined_types = set()
-        # self._glr.debug = debug
-
         if use_cpp:
             content = preprocess_file(file_path, cpp_path, cpp_args)
         else:
@@ -165,6 +183,79 @@ class CParser:
                 content = f.read()
 
         return self.parse(content, debug)
+
+    def disambiguate(self, parent):
+        """Filter for dynamic disambiguation
+
+        Solves problems with following disambiguations:
+            * typedef_name
+            * primary_exp
+            * iteration_stat
+
+        typedef_name & primary_exp disambiguations
+        ------------------------------------------
+        Whenever the REDUCE is called on typedef_name or primary_exp rule,
+        we first check if the ID that is trying to be reduced is actually a
+        user-defined type (struct, union, typedef). If yes, than the REDUCE
+        will be called.
+
+        iteration_stat disambiguation
+        -----------------------------
+        Handles the case where for loop contains declarations inside init
+        block. For example:
+            for (int i = 0; ...)
+
+        Disambiguity happens because part `i = 0` can be recognized
+        both as exp_opt and init_declarator_list_opt. In this case, part
+        `i = 0` is always reduced to init_declarator_list_opt rule.
+        """
+        # assume all possibilities are valid, and remove those that are not.
+        valid = list(parent.possibilities)
+        user_def_symbols = self.user_defined_types
+
+        class Invalid(Exception):
+            pass
+
+        for pos in parent:
+
+            def traverse_tree(node):
+                # For each possibility, descend down the sub-tree and keep parts
+                # seen so far. If the same part if found the sub-tree is invalid.
+
+                if isinstance(node, Node):
+                    if node.symbol.name == "typedef_name":
+                        token_value = node.children[0].token.value
+                        if token_value not in user_def_symbols:
+                            valid.remove(pos)
+
+                    if node.symbol.name == "direct_declarator":
+                        if len(node.children) == 1:
+                            token_value = node.children[0].token.value
+                            if token_value in user_def_symbols and pos in valid:
+                                valid.remove(pos)
+
+                    if node.symbol.name == "primary_exp":
+                        child = node.children[0]
+                        if child.symbol.name != "cconst":
+
+                            token_value = node.children[0].token.value
+                            if token_value in user_def_symbols and pos in valid:
+                                valid.remove(pos)
+
+                    if pos.symbol.name == "iteration_stat":
+                        if node.symbol.name == "init_declarator_list_opt":
+                            if len(node.children) == 0:
+                                valid.remove(pos)
+
+                for n in node:
+                    traverse_tree(n)
+
+            try:
+                traverse_tree(pos)
+            except Invalid:
+                continue
+
+        parent.possibilities = valid
 
 
 def isrule(non_term, rule_name):
