@@ -120,7 +120,7 @@ class CParser:
                     name_spec = nodes[-1][0]
                     name = name_spec[-1] if isinstance(name_spec, list) else name_spec
                     self.user_defined_types.add(name)
-                if first_el[0] in {"struct", "union"}:
+                if first_el[0] in {"struct", "union", "class"}:
                     self.user_defined_types.add(first_el[1])
 
             if isrule(first_el, "storage_class_spec"):
@@ -213,14 +213,10 @@ class CParser:
         valid = list(parent.possibilities)
         user_def_symbols = self.user_defined_types
 
-        class Invalid(Exception):
-            pass
-
         for pos in parent:
 
             def traverse_tree(node):
-                # For each possibility, descend down the sub-tree and keep parts
-                # seen so far. If the same part if found the sub-tree is invalid.
+                # For each possibility, descend down the sub-tree.
 
                 if isinstance(node, Node):
                     if node.symbol.name == "typedef_name":
@@ -250,10 +246,7 @@ class CParser:
                 for n in node:
                     traverse_tree(n)
 
-            try:
-                traverse_tree(pos)
-            except Invalid:
-                continue
+            traverse_tree(pos)
 
         parent.possibilities = valid
 
