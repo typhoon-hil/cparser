@@ -23,6 +23,6 @@ class ASTVisitor(object):
 
     def _generic_visit(self, node, debug=False):
         """Called if no explicit visitor method is declared for a node."""
-        if hasattr(node, "children"):
+        if hasattr(node, "children") and node.children is not None:
             for c in node.children:
                 self.visit(c, debug)

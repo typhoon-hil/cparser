@@ -1,19 +1,27 @@
 import os
 import glob
+from tests.utils import check_or_update
 
 
-def test_code_snippets(parser):
+def test_code_snippets(parser, update):
 
     this_file = os.path.realpath(os.path.dirname(__file__))
     root_path = os.path.split(os.path.abspath(os.path.join(this_file)))[0]
 
-    snippets_path = os.path.join(root_path, "tests", "code_snippets", "*.c")
+    snippets_path = os.path.join(root_path, "test_code_snippets",
+                                 "code_snippets", "*.c")
 
     example_idx = 0
 
     for example in glob.iglob(snippets_path):
         print("Parsing: %s" % example)
-        parser.parse_file(example)
+
+        tree = parser.parse_file(example)
+
+        filename, _ = os.path.splitext(example)
+        file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                                 "{}.tree".format(filename))
+        check_or_update(update, tree, file_path)
 
         example_idx += 1
 

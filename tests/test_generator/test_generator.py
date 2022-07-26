@@ -1,7 +1,9 @@
+import os
+
 from cparser.generator import CodeGenerator
 
 
-def test_generator(parser):
+def test_generator(parser, update):
     """Tests visitor that renames the id's."""
 
     code = """
@@ -37,4 +39,12 @@ def test_generator(parser):
 
     generator = CodeGenerator()
     code = generator.generate(ast, debug=True)
-    print(code)
+
+    file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                             "test_generator.c")
+    if update:
+        with open(file_path, "w") as f:
+            f.write(code)
+    else:
+        with open(file_path, "r") as f:
+            assert code == f.read()
