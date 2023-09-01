@@ -161,7 +161,7 @@ class CParser:
                 f.write(forest.to_dot())
 
         # Collect user-defined types
-        self._glr.call_actions(forest[0])
+        self._glr.call_actions(forest.get_first_tree())
 
         # Call disambiguate here
         forest.disambiguate(self.disambiguate)
@@ -171,7 +171,7 @@ class CParser:
                 f.write(forest.to_dot())
 
         assert len(forest) == 1
-        return forest[0]
+        return forest.get_first_tree()
 
     def parse_file(self, file_path, use_cpp=False, cpp_path="cpp",
                    cpp_args=None, debug=False):
