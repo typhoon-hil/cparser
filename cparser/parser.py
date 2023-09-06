@@ -18,56 +18,6 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        def dynamic_disambig_filter(context, action, subresults):
-            """Filter for dynamic disambiguation
-
-            Solves problems with following disambiguations:
-                * typedef_name
-                * primary_exp
-                * iteration_stat
-
-            typedef_name & primary_exp disambiguations
-            ------------------------------------------
-            Whenever the REDUCE is called on typedef_name or primary_exp rule,
-            we first check if the ID that is trying to be reduced is actually a
-            user-defined type (struct, union, typedef). If yes, than the REDUCE
-            will be called.
-
-            iteration_stat disambiguation
-            -----------------------------
-            Handles the case where for loop contains declarations inside init
-            block. For example:
-                for (int i = 0; ...)
-
-            Disambiguity happens because part `i = 0` can be recognized
-            both as exp_opt and init_declarator_list_opt. In this case, part
-            `i = 0` is always reduced to init_declarator_list_opt rule.
-            """
-            if action is None:
-                return
-
-            production = context.production
-
-            if action is REDUCE and production.symbol.fqn == "typedef_name":
-
-                var_name = subresults[0].value
-                if var_name not in self.user_defined_types:
-                    return False
-
-            if action is REDUCE and production.symbol.fqn == "primary_exp":
-                child = subresults[0]
-                if child.symbol.fqn == "id":
-                    if child.value in self.user_defined_types:
-                        return False
-
-            if action is REDUCE and production.symbol.fqn == "iteration_stat":
-                if isrule(subresults[2], "decl_body"):
-                    init_declarator_list_opt = subresults[2].children[1]
-                    if len(init_declarator_list_opt.children) == 0:
-                        return False
-
-            return True
-
         self._glr = GLRParser(grammar, build_tree=True,
                               call_actions_during_tree_build=True,
                               actions=self._setup_actions(),
@@ -191,6 +141,7 @@ class CParser:
             * typedef_name
             * primary_exp
             * iteration_stat
+            * the dangling else
 
         typedef_name & primary_exp disambiguations
         ------------------------------------------
@@ -208,12 +159,25 @@ class CParser:
         Disambiguity happens because part `i = 0` can be recognized
         both as exp_opt and init_declarator_list_opt. In this case, part
         `i = 0` is always reduced to init_declarator_list_opt rule.
+
+        The dangling else disambiguation
+        --------------------------------
+        In the following example, `else` statement should belong to the nearest
+        if-clause (in this case it is `if (b < 5)`):
+        Example:
+            if (a > 10)
+                if (b < 5)
+                    c = 1
+                else
+                    c = 2
+
         """
         # assume all possibilities are valid, and remove those that are not.
         valid = list(parent.possibilities)
         user_def_symbols = self.user_defined_types
 
         for pos in parent:
+            is_selection_stat = pos.symbol.name == "if_stat"
 
             def traverse_tree(node):
                 # For each possibility, descend down the sub-tree.
@@ -241,6 +205,16 @@ class CParser:
                     if pos.symbol.name == "iteration_stat":
                         if node.symbol.name == "init_declarator_list_opt":
                             if len(node.children) == 0:
+                                valid.remove(pos)
+
+                    if is_selection_stat:
+                        has_else = len(pos.children) > 5
+                        # If `pos` node has an else clause, and it's child node
+                        # is also an if-clause, then the else clause should be
+                        # attached to the child node. Hence, we discard this
+                        # pos.
+                        if node.symbol.name == "if_stat" and has_else:
+                            if pos in valid:
                                 valid.remove(pos)
 
                 for n in node:

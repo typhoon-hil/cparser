@@ -210,9 +210,12 @@ stat_list                   : stat
                             | stat_list stat
                             ;
 
-selection_stat              : 'if' '(' exp ')' stat
-                            | 'if' '(' exp ')' stat 'else' stat
+selection_stat              : if_stat
                             | 'switch' '(' exp ')' stat
+                            ;
+
+if_stat                     : 'if' '(' exp ')' stat
+                            | 'if' '(' exp ')' stat 'else' stat
                             ;
 
 iteration_stat              : 'while' '(' exp ')' stat

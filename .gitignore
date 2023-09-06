@@ -72,3 +72,6 @@ cparser/cgrammar.pgt
 
 # Visual Studio Code
 .vscode/
+
+# venv
+venv/
