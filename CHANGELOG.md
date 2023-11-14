@@ -9,10 +9,18 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## [0.4.0] - 2023.11.14
+
+### Changed
+
+- Relaxed dependency towards `parglare` parser.
+
 ## [0.3.1] - 2023.09.08
+
 ### Changed
 
 - The dangling else problem is handled.
+-
 ## [0.3.0] - 2023.09.04
 
 ### Changed
