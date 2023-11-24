@@ -1,13 +1,5 @@
 from cparser.parser import CParser
-
-
-def get_version():
-    """
-    Return C parser version. Used in setup.py and anywhere
-    where version is needed.
-    """
-    return "0.4.0"
-
+from cparser.version import get_version
 
 __version__ = get_version()
 

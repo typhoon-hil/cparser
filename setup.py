@@ -1,7 +1,7 @@
 import os
 import codecs
 from setuptools import setup, find_packages
-from cparser import get_version
+from cparser.version import get_version
 
 
 NAME = "cparser"
@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/x-rst",
     version=get_version(),
     license="MIT",
-    install_requires=["parglare==0.16"],
+    install_requires=["parglare>=0.16,<0.17"],
     tests_require=["pytest"],
     author="Typhoon HIL, Inc",
     url="https://github.com/typhoon-hil/cparser",
