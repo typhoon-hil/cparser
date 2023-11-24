@@ -9,6 +9,14 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## [0.4.1] - 2023.11.24
+
+### Changed
+
+- Fixed `parglare` dependency. Now we should be able to use all 0.16.* versions of `parglare`.
+- Fixed problem with installing `cparser` in editable mode.
+
+
 ## [0.4.0] - 2023.11.14
 
 ### Changed
