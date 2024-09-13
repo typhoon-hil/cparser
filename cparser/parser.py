@@ -68,32 +68,35 @@ class CParser:
             if isinstance(first_el, list):
                 if first_el[0] == "typedef":
                     name_spec = nodes[-1][0]
-                    name = name_spec[-1] if isinstance(name_spec, list) else name_spec
-                    self.user_defined_types.add(name)
-                if first_el[0] in {"struct", "union", "class"}:
-                    self.user_defined_types.add(first_el[1])
+                    ddeclarator = name_spec[-1] if isinstance(name_spec, list) else name_spec
+                    self.user_defined_types.add(ddeclarator.name)
+                # if first_el[0] in {"struct", "union", "class"}:
+                #     self.user_defined_types.add(first_el[1])
 
-            if isrule(first_el, "storage_class_spec"):
+            # if isrule(first_el, "storage_class_spec"):
 
-                if first_el.children[0].value == "typedef":
-                    # If the current decl_specs is definition of custom type by
-                    # using 'typedef', get the name of the defined type.
-                    init_decl_list_opt = nodes[1]
-                    if not init_decl_list_opt.children:
-                        return
+            #     if first_el.children[0].value == "typedef":
+            #         # If the current decl_specs is definition of custom type by
+            #         # using 'typedef', get the name of the defined type.
+            #         init_decl_list_opt = nodes[1]
+            #         if not init_decl_list_opt.children:
+            #             return
 
-                    init_decl_list = init_decl_list_opt.children[0]
-                    for init_decl in init_decl_list.children:
-                        recurse_init_decl(init_decl)
+            #         init_decl_list = init_decl_list_opt.children[0]
+            #         for init_decl in init_decl_list.children:
+            #             recurse_init_decl(init_decl)
 
-            # Productions that start with type_spec
-            if isrule(first_el, "type_spec"):
-                type_spec_children = first_el.children
-                ts_first = type_spec_children[0]
+            if first_el.__class__.__name__ == "struct_or_union_spec":
+                self.user_defined_types.add(first_el.id)
 
-                if isrule(ts_first, "struct_or_union_spec"):
-                    struct_name = ts_first.children[1].value
-                    self.user_defined_types.add(struct_name)
+            # # Productions that start with type_spec
+            # if isrule(first_el, "type_spec"):
+            #     type_spec_children = first_el.children
+            #     ts_first = type_spec_children[0]
+
+            #     if isrule(ts_first, "struct_or_union_spec"):
+            #         struct_name = ts_first.children[1].value
+            #         self.user_defined_types.add(struct_name)
 
         return {
             "decl_body": decl_body
@@ -177,7 +180,7 @@ class CParser:
         user_def_symbols = self.user_defined_types
 
         for pos in parent:
-            is_selection_stat = pos.symbol.name == "if_stat"
+            is_selection_stat = pos.symbol.name == "selection_stat"
 
             def traverse_tree(node):
                 # For each possibility, descend down the sub-tree.
@@ -213,7 +216,7 @@ class CParser:
                         # is also an if-clause, then the else clause should be
                         # attached to the child node. Hence, we discard this
                         # pos.
-                        if node.symbol.name == "if_stat" and has_else:
+                        if node.symbol.name == "selection_stat" and has_else:
                             if pos in valid:
                                 valid.remove(pos)
 
