@@ -2,6 +2,57 @@ import os
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
 
+class Declaration:
+    """Declaration object
+
+    This object is created for every declaration of interest in semantic
+    actions.
+    """
+    def __init__(self):
+        self.storage_spec = None
+        self.type_spec = None
+        self.type_qual = None
+        self._name = None
+        self.pos = None
+        self.type_spec_pos = None
+
+    @property
+    def name(self):
+        if self._name:
+            return self._name
+        if self.type_spec.__class__.__name__ == "struct_or_union_spec":
+            return self.type_spec.id
+        return ""
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    def __repr__(self):
+        if self.type_spec.__class__.__name__ == "struct_or_union_spec":
+            return f"struct|union {self.type_spec.id}"
+
+        return f"{self.type_spec} {self.name}"
+
+    @property
+    def is_typedef(self):
+        return self.storage_spec == "typedef"
+
+    @property
+    def is_class(self):
+        if hasattr(self.type_spec, "is_class"):
+            return self.type_spec.is_class
+
+        if hasattr(self.type_spec, "struct_type"):
+            return self.type_spec.struct_type == "class"
+
+        return False
+
+    @property
+    def simple_type(self):
+        return self.type_spec in ('void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex')
+
+
 class CParser:
 
     def __init__(self):
@@ -9,6 +60,9 @@ class CParser:
         self._setup_parser()
 
         self.user_defined_types = set()
+        self.declarations = {}
+        self.var_refs = {}
+        self.functions = {}
 
     def _setup_parser(self):
         """Setup parser."""
@@ -23,6 +77,12 @@ class CParser:
                               actions=self._setup_actions(),
                               lexical_disambiguation=True)
 
+    def reset_parser(self):
+        self.user_defined_types = set()
+        self.declarations = {}
+        self.var_refs = {}
+        self.functions = {}
+
     def _setup_actions(self):
         """Creates a dict of semantic actions that will be called during
         parsing
@@ -31,80 +91,77 @@ class CParser:
             dict
         """
 
-        def decl_body(context, nodes):
+        def primary_exp(context, nodes, var_ref=None):
+            pos = (context.start_position, context.end_position)
+            if var_ref is not None:
+                self.var_refs[pos] = var_ref
+
+        def decl_body(context, nodes, specs, init_decl_list):
             """Semantic action called for every decl_body production
 
             This semantic action is used to collect every user-defined type in
             a code. This includes structs, unions and typedefs.
             """
-            def collect_direct_decl_name(init_dcl):
-                """Adds the name of direct declarator into the set of
-                user-defined types"""
-                declarator = init_dcl.children[0]
+            declaration = Declaration()
 
-                if isrule(declarator.children[0], "direct_declarator"):
-                    direct_declarator = declarator.children[0]
-                else:
-                    # in case of pointer, declarator is a second
-                    # child
-                    direct_declarator = declarator.children[1]
+            pos = (context.start_position, context.end_position)
 
-                if isinstance(direct_declarator.children[0], NodeTerm):
-                    value = direct_declarator.children[0].value
-                    self.user_defined_types.add(value)
+            if init_decl_list:
+                ddeclarator = init_decl_list[0].decl.dd
+                pos = (ddeclarator._pg_start_position, ddeclarator._pg_end_position)
+                if hasattr(ddeclarator, "name"):
+                    declaration.name = ddeclarator.name
+                if hasattr(ddeclarator, "array"):
+                    print(ddeclarator.array)
+                    if not hasattr(ddeclarator.array, "name"):
+                        ddeclarator = ddeclarator.array
+                    declaration.name = ddeclarator.array.name
+                    pos = (ddeclarator.array._pg_start_position, ddeclarator.array._pg_end_position)
 
-            def recurse_init_decl(init_dcl):
-                """Recurses through the init declarator rule."""
-                if len(init_dcl.children) > 1:
+            declaration.pos = pos
+            for spec in specs:
+                if hasattr(spec, "storage_spec") and spec.storage_spec is not None:
+                    declaration.storage_spec = spec.storage_spec
+                    if spec.storage_spec == "typedef":
+                        self.user_defined_types.add(declaration.name)
 
-                    # last child is always direct declarator
-                    collect_direct_decl_name(init_dcl.children[-1])
-                    # first child is always recursive init_declarator_1_comma
-                    recurse_init_decl(init_dcl.children[0])
-                else:
-                    collect_direct_decl_name(init_dcl.children[0])
+                if hasattr(spec, "type_spec") and spec.type_spec is not None:
+                    type_spec_pos = (
+                        spec._pg_start_position,
+                        spec._pg_end_position
+                    )
+                    try:
+                        type_spec = spec.type_spec.id
+                        declaration.type_spec = spec.type_spec
+                        if init_decl_list is None:
+                            type_spec_pos = None
+                    except AttributeError:
+                        type_spec = spec.type_spec
+                        declaration.type_spec = type_spec
 
-            first_el = nodes[0]
-            if isinstance(first_el, list):
-                if first_el[0] == "typedef":
-                    name_spec = nodes[-1][0]
-                    ddeclarator = name_spec[-1] if isinstance(name_spec, list) else name_spec
-                    self.user_defined_types.add(ddeclarator.name)
-                # if first_el[0] in {"struct", "union", "class"}:
-                #     self.user_defined_types.add(first_el[1])
+                    declaration.type_spec_pos = type_spec_pos
+                    if not declaration.simple_type:
+                        self.user_defined_types.add(type_spec)
 
-            # if isrule(first_el, "storage_class_spec"):
 
-            #     if first_el.children[0].value == "typedef":
-            #         # If the current decl_specs is definition of custom type by
-            #         # using 'typedef', get the name of the defined type.
-            #         init_decl_list_opt = nodes[1]
-            #         if not init_decl_list_opt.children:
-            #             return
+                if hasattr(spec, "type_qual") and spec.type_qual is not None:
+                    declaration.type_qual = spec.type_qual
 
-            #         init_decl_list = init_decl_list_opt.children[0]
-            #         for init_decl in init_decl_list.children:
-            #             recurse_init_decl(init_decl)
+            self.declarations[pos] = declaration
 
-            if first_el.__class__.__name__ == "struct_or_union_spec":
-                self.user_defined_types.add(first_el.id)
-
-            # # Productions that start with type_spec
-            # if isrule(first_el, "type_spec"):
-            #     type_spec_children = first_el.children
-            #     ts_first = type_spec_children[0]
-
-            #     if isrule(ts_first, "struct_or_union_spec"):
-            #         struct_name = ts_first.children[1].value
-            #         self.user_defined_types.add(struct_name)
+        def function_definition(context, nodes, declarator, decl_specs=None, decl_list=None, body=None):
+            pos = (context.start_position, context.end_position)
+            self.functions[pos] = declarator.dd.fnc_call.name
 
         return {
-            "decl_body": decl_body
+            "decl_body": decl_body,
+            "primary_exp": primary_exp,
+            "function_definition": function_definition
         }
 
     def parse(self, code, debug=False):
         """Parses the given code string."""
-        self.user_defined_types = set()
+        self.reset_parser()
         self._glr.debug = debug
 
         forest = self._glr.parse(code)
@@ -118,6 +175,9 @@ class CParser:
 
         # Call disambiguate here
         forest.disambiguate(self.disambiguate)
+
+        self._process_typedefs()
+        self._process_var_refs()
 
         if debug:
             with open("debug2.dot", "w") as f:
@@ -188,7 +248,7 @@ class CParser:
                 if isinstance(node, Node):
                     if node.symbol.name == "typedef_name":
                         token_value = node.children[0].token.value
-                        if token_value not in user_def_symbols:
+                        if token_value not in user_def_symbols and pos in valid:
                             valid.remove(pos)
 
                     if node.symbol.name == "direct_declarator":
@@ -227,6 +287,47 @@ class CParser:
 
         parent.possibilities = valid
 
+    def _process_typedefs(self):
+        """Replaces the typedef reference with Declaration object."""
+        typedefs = []
+        d = {}
+        classes = {}
+        for decl in self.declarations.values():
+            d[decl.name] = decl
+            if decl.storage_spec == "typedef":
+                typedefs.append(decl)
+            if decl.is_class:
+                classes[decl.name] = decl
+
+        for t in typedefs:
+            if t.type_spec in d:
+                t.type_spec = d[t.type_spec]
+
+        for decl in self.declarations.values():
+            if decl.type_spec in classes:
+                decl.type_spec = classes[decl.type_spec]
+
+    def _process_var_refs(self):
+        """Replaces the variable reference with Declaration object."""
+        from collections import defaultdict
+        decl_names = defaultdict(list)
+        for d in self.declarations.values():
+            decl_names[d.name].append(d)
+
+        invalid_refs = {}
+        for pos, name in self.var_refs.items():
+            if name in decl_names:
+                self.var_refs[pos] = decl_names[name][0]
+            else:
+                # Invalid ref
+                # self._var_refs[pos] = None
+                invalid_refs[pos] = name
+                # del self.var_refs[pos]
+
+        for inv in invalid_refs:
+            del self.var_refs[inv]
+
+        return invalid_refs
 
 def isrule(non_term, rule_name):
     """Helper function. Return `True` if given NodeNonTerm matches

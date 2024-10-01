@@ -1,12 +1,11 @@
 // C Grammar taken from: http://www.cs.man.ac.uk/~pjj/bnf/c_syntax.bnf
 
-translation_unit            : external_decl
-                            | translation_unit external_decl
+translation_unit            : external_decls=external_decl+
                             ;
 
-external_decl               : function_definition
-                            | decl
-                            | line_directive
+external_decl               : function=function_definition
+                            | declaration=decl
+                            | ld=line_directive
                             ;
 
 line_directive              : "#" int_const string line_directive_int?
@@ -16,27 +15,26 @@ line_directive_int          : int_const
                             | line_directive_int int_const
                             ;
 
-function_definition         : decl_specs declarator decl_list compound_stat
-                            | declarator decl_list compound_stat
-                            | decl_specs declarator compound_stat
-                            | declarator compound_stat
+function_definition         : decl_specs=decl_specs declarator=declarator decl_list=decl_list body=compound_stat
+                            | declarator=declarator decl_list=decl_list body=compound_stat
+                            | decl_specs=decl_specs declarator=declarator body=compound_stat
+                            | declarator=declarator body=compound_stat
                             ;
 
 decl                        : decl_body ';'
                             ;
 
-decl_body                   : decl_specs init_declarator_list?
+decl_body                   : specs=decl_specs init_decl_list=init_declarator_list?
                             ;
 
 decl_list                   : decl+
                             ;
 
-decl_specs                  : storage_class_spec decl_specs {dynamic}
-                            | storage_class_spec {dynamic}
-                            | type_spec decl_specs {dynamic}
-                            | type_spec {dynamic}
-                            | type_qualifier decl_specs
-                            | type_qualifier
+decl_specs                  : (
+                                storage_spec=storage_class_spec
+                              | type_spec=type_spec
+                              | type_qual=type_qualifier
+                              )+
                             ;
 
 storage_class_spec          : 'auto' | 'register' | 'static' | 'extern' | 'typedef'
@@ -55,9 +53,9 @@ type_spec                   : 'void' | 'char' | 'short' | 'int' | 'long' | 'floa
 type_qualifier              : 'const' | 'volatile'
                             ;
 
-struct_or_union_spec        : struct_or_union id=id '{' fields=struct_decl+ '}'
-                            | struct_or_union '{' fields=struct_decl+ '}'
-                            | struct_or_union id=id
+struct_or_union_spec        : struct_type=struct_or_union id=id '{' fields=struct_decl+ '}'
+                            | struct_type=struct_or_union '{' fields=struct_decl+ '}'
+                            | struct_type=struct_or_union id=id
                             ;
 
 
@@ -67,8 +65,8 @@ struct_or_union             : 'struct' | 'union' | 'class'  // added class so th
 init_declarator_list        : init_declarator+[comma]
                             ;
 
-init_declarator             : declarator
-                            | declarator '=' initializer
+init_declarator             : decl=declarator
+                            | decl=declarator '=' init=initializer
                             ;
 
 struct_decl                 : spec_qualifier_list struct_declarator+[comma] ';'
@@ -95,16 +93,16 @@ enumerator                  : id
                             | id '=' const_exp
                             ;
 
-declarator                  : pointer? direct_declarator
+declarator                  : pointer? dd=direct_declarator
                             ;
 
 direct_declarator           : name=id
                             | '(' declarator ')'
-                            | direct_declarator '[' const_exp ']'
-                            | direct_declarator '['     ']'
-                            | direct_declarator '(' param_type_list ')'
-                            | direct_declarator '(' id+[comma] ')'
-                            | direct_declarator '('     ')'
+                            | array=direct_declarator '[' const_exp ']'
+                            | array=direct_declarator '['     ']'
+                            | fnc_call=direct_declarator '(' param_type_list ')'
+                            | fnc_call=direct_declarator '(' id+[comma] ')'
+                            | fnc_call=direct_declarator '('     ')'
                             ;
 
 pointer                     : '*' type_qualifier* pointer?

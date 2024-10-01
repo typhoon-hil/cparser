@@ -16,9 +16,6 @@ def test_code_snippets(parser, update):
     for example in glob.iglob(snippets_path):
         print("Parsing: %s" % example)
 
-        # if example != "/home/alen/typhoon/alen-cparser/cparser/tests/test_code_snippets/code_snippets/dangling_else.c":
-        #     continue
-
         tree = parser.parse_file(example)
 
         filename, _ = os.path.splitext(example)

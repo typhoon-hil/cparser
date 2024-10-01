@@ -26,7 +26,7 @@ class CodeGenerator(ASTVisitor):
             return ""
 
         if hasattr(node, "children") and node.children is not None:
-            return "".join(self.visit(c) for c in node.children)
+            return " ".join(self.visit(c) for c in node.children)
         else:
             return node.value
 
@@ -104,6 +104,9 @@ class CodeGenerator(ASTVisitor):
     def visit_jump_stat(self, node):
         ret = " ".join(self.visit(c) for c in node.children[:-1])
         return ret + ";"
+
+    def visit_line_directive(self, node):
+        return "\n"
 
     def _generate_stat(self, node):
 
