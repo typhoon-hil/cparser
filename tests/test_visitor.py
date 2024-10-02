@@ -1,5 +1,4 @@
-from cparser.visitor import ASTVisitor, RenameVisitor
-from cparser.generator import CodeGenerator
+from cparser.visitor import ASTVisitor
 
 
 def test_id_visitor(parser):

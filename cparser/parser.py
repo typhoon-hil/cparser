@@ -1,6 +1,7 @@
 import os
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
+BUILTIN_TYPES = ('void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex')
 
 class Declaration:
     """Declaration object
@@ -15,6 +16,7 @@ class Declaration:
         self._name = None
         self.pos = None
         self.type_spec_pos = None
+        self.uknown_type = False
 
     @property
     def name(self):
@@ -50,7 +52,7 @@ class Declaration:
 
     @property
     def simple_type(self):
-        return self.type_spec in ('void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex')
+        return self.type_spec in BUILTIN_TYPES
 
 
 class CParser:
@@ -140,6 +142,10 @@ class CParser:
                         declaration.type_spec = type_spec
 
                     declaration.type_spec_pos = type_spec_pos
+                    if type_spec not in BUILTIN_TYPES and type_spec not in self.user_defined_types:
+                        declaration.uknown_type = True
+
+                    # Add type to user defined types to avoid ambiguities.
                     if not declaration.simple_type:
                         self.user_defined_types.add(type_spec)
 

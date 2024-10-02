@@ -9,6 +9,16 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## [Unreleased]
+
+### Added
+
+- Added `Declaration` class that collects information about all declarations of interest in semantic actions.
+
+### Changed
+
+- Simplified some grammar rules and added named matches to simplify semantic actions  (**BIC**)
+
 ## [0.4.1] - 2023.11.24
 
 ### Changed
