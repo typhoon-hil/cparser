@@ -187,7 +187,7 @@ class CParser:
             context, nodes, declarator, decl_specs=None, decl_list=None, body=None
         ):
             pos = (context.start_position, context.end_position)
-            self.functions[pos] = declarator.dd.fnc_call.name
+            self.functions[pos] = declarator.dd.fnc_decl.name
 
         return {
             "decl_body": decl_body,

@@ -100,9 +100,9 @@ direct_declarator           : name=id
                             | '(' declarator ')'
                             | array=direct_declarator '[' const_exp ']'
                             | array=direct_declarator '['     ']'
-                            | fnc_call=direct_declarator '(' param_type_list ')'
-                            | fnc_call=direct_declarator '(' id+[comma] ')'
-                            | fnc_call=direct_declarator '('     ')'
+                            | fnc_decl=direct_declarator '(' param_type_list ')'
+                            | fnc_decl=direct_declarator '(' id+[comma] ')'
+                            | fnc_decl=direct_declarator '('     ')'
                             ;
 
 pointer                     : '*' type_qualifier* pointer?
