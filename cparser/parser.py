@@ -1,7 +1,23 @@
 import os
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
-BUILTIN_TYPES = ('void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex')
+BUILTIN_TYPES = (
+    "void",
+    "char",
+    "short",
+    "int",
+    "long",
+    "float",
+    "double",
+    "signed",
+    "unsigned",
+    "_Bool",
+    "_Complex",
+)
+TYPE_DEFINED = 0
+TYPE_UNDEFINED = 1
+TYPE_MAYBE_UNDEFINED = 2
+
 
 class Declaration:
     """Declaration object
@@ -9,6 +25,7 @@ class Declaration:
     This object is created for every declaration of interest in semantic
     actions.
     """
+
     def __init__(self):
         self.storage_spec = None
         self.type_spec = None
@@ -16,7 +33,7 @@ class Declaration:
         self._name = None
         self.pos = None
         self.type_spec_pos = None
-        self.uknown_type = False
+        self.type_status = TYPE_DEFINED
 
     @property
     def name(self):
@@ -54,6 +71,10 @@ class Declaration:
     def simple_type(self):
         return self.type_spec in BUILTIN_TYPES
 
+    @property
+    def type_defined(self):
+        return self.type_status == TYPE_DEFINED
+
 
 class CParser:
 
@@ -74,10 +95,13 @@ class CParser:
 
         grammar = Grammar.from_file(grammar_path)
 
-        self._glr = GLRParser(grammar, build_tree=True,
-                              call_actions_during_tree_build=True,
-                              actions=self._setup_actions(),
-                              lexical_disambiguation=True)
+        self._glr = GLRParser(
+            grammar,
+            build_tree=True,
+            call_actions_during_tree_build=True,
+            actions=self._setup_actions(),
+            lexical_disambiguation=True,
+        )
 
     def reset_parser(self):
         self.user_defined_types = set()
@@ -118,7 +142,10 @@ class CParser:
                     if not hasattr(ddeclarator.array, "name"):
                         ddeclarator = ddeclarator.array
                     declaration.name = ddeclarator.array.name
-                    pos = (ddeclarator.array._pg_start_position, ddeclarator.array._pg_end_position)
+                    pos = (
+                        ddeclarator.array._pg_start_position,
+                        ddeclarator.array._pg_end_position,
+                    )
 
             declaration.pos = pos
             for spec in specs:
@@ -128,41 +155,44 @@ class CParser:
                         self.user_defined_types.add(declaration.name)
 
                 if hasattr(spec, "type_spec") and spec.type_spec is not None:
-                    type_spec_pos = (
-                        spec._pg_start_position,
-                        spec._pg_end_position
-                    )
+                    type_spec_pos = (spec._pg_start_position, spec._pg_end_position)
                     try:
                         type_spec = spec.type_spec.id
                         declaration.type_spec = spec.type_spec
                         if init_decl_list is None:
                             type_spec_pos = None
+                        self.user_defined_types.add(type_spec)
                     except AttributeError:
                         type_spec = spec.type_spec
                         declaration.type_spec = type_spec
 
                     declaration.type_spec_pos = type_spec_pos
-                    if type_spec not in BUILTIN_TYPES and type_spec not in self.user_defined_types:
-                        declaration.uknown_type = True
+                    if (
+                        type_spec not in BUILTIN_TYPES
+                        and type_spec not in self.user_defined_types
+                        and not declaration.is_typedef
+                    ):
+                        declaration.type_status = TYPE_MAYBE_UNDEFINED
 
                     # Add type to user defined types to avoid ambiguities.
                     if not declaration.simple_type:
                         self.user_defined_types.add(type_spec)
-
 
                 if hasattr(spec, "type_qual") and spec.type_qual is not None:
                     declaration.type_qual = spec.type_qual
 
             self.declarations[pos] = declaration
 
-        def function_definition(context, nodes, declarator, decl_specs=None, decl_list=None, body=None):
+        def function_definition(
+            context, nodes, declarator, decl_specs=None, decl_list=None, body=None
+        ):
             pos = (context.start_position, context.end_position)
             self.functions[pos] = declarator.dd.fnc_call.name
 
         return {
             "decl_body": decl_body,
             "primary_exp": primary_exp,
-            "function_definition": function_definition
+            "function_definition": function_definition,
         }
 
     def parse(self, code, debug=False):
@@ -192,8 +222,9 @@ class CParser:
         assert len(forest) == 1
         return forest.get_first_tree()
 
-    def parse_file(self, file_path, use_cpp=False, cpp_path="cpp",
-                   cpp_args=None, debug=False):
+    def parse_file(
+        self, file_path, use_cpp=False, cpp_path="cpp", cpp_args=None, debug=False
+    ):
         """Parses content from the given file."""
         if use_cpp:
             content = preprocess_file(file_path, cpp_path, cpp_args)
@@ -310,12 +341,20 @@ class CParser:
                 t.type_spec = d[t.type_spec]
 
         for decl in self.declarations.values():
+            if decl.type_status == TYPE_MAYBE_UNDEFINED:
+                for t in typedefs:
+                    if decl.type_spec == t.name:
+                        # There is a match, so the type is valid
+                        decl.type_status = TYPE_DEFINED
+
+        for decl in self.declarations.values():
             if decl.type_spec in classes:
                 decl.type_spec = classes[decl.type_spec]
 
     def _process_var_refs(self):
         """Replaces the variable reference with Declaration object."""
         from collections import defaultdict
+
         decl_names = defaultdict(list)
         for d in self.declarations.values():
             decl_names[d.name].append(d)
@@ -334,6 +373,7 @@ class CParser:
             del self.var_refs[inv]
 
         return invalid_refs
+
 
 def isrule(non_term, rule_name):
     """Helper function. Return `True` if given NodeNonTerm matches
@@ -369,10 +409,10 @@ def preprocess_file(file_path, cpp_path, cpp_args=None):
 
     # do not show command prompt when running subprocess on Windows.
     params = dict()
-    if os.name == 'nt':
+    if os.name == "nt":
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        params['startupinfo'] = startupinfo
+        params["startupinfo"] = startupinfo
 
     p = subprocess.Popen(
         command,
@@ -380,7 +420,7 @@ def preprocess_file(file_path, cpp_path, cpp_args=None):
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        **params
+        **params,
     )
     _, sterr = p.communicate()
     sterr = sterr.decode(encoding="utf-8")
