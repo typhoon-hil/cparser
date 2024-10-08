@@ -9,7 +9,7 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
-## [Unreleased]
+## [0.5.0] - 2024.10.08
 
 ### Added
 
