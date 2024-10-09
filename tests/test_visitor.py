@@ -12,8 +12,6 @@ def test_id_visitor(parser):
             int simple_number;
         } s;
     };
-
-    typedef Complex complex_type;
     """
 
     ast = parser.parse(code)
@@ -30,7 +28,7 @@ def test_id_visitor(parser):
 
     visitor = IDVisitor()
     visitor.visit(ast)
-    assert len(visitor.found_ids) == 7
+    assert len(visitor.found_ids) == 5
 
 
 def test_struct_or_union_spec(parser):

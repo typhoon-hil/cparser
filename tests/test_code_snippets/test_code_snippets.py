@@ -29,16 +29,16 @@ def test_code_snippets(parser, update):
 def test_decl_after_if(parser):
 
     code = """
-    
+
     int main(int argc, const char **argv){
-        
+
         int a = 1;
         if (a > 5) {
-           
+
         }
-        
+
         int n;
-    
+
         return 0;
     }
     """
@@ -49,14 +49,14 @@ def test_decl_after_if(parser):
 def test_for_loop_v1(parser):
 
     code = """
-    
+
     int main(int argc, const char **argv){
-        
+
         int i;
         for(i = 0; i < 10; i++) {
-        
+
         }
-        
+
     }
     """
 
@@ -113,7 +113,7 @@ def test_for_loop_v4(parser):
             if ( i < 10 ) {
                 break;
             }
-            
+
             i++;
         }
 
@@ -147,7 +147,7 @@ def test_for_loop_c99(parser):
     code = """
 
         int main(int argc, const char **argv){
-            
+
             int j;
             for(int i = 0, j = 0;;) {
                 if ( i < 10 ) {
@@ -237,7 +237,7 @@ def test_unsigned_int(parser):
     code = """
     unsigned truncUint(int sizeOfWord, unsigned n)
     {
-        
+
       if (sizeOfWord == 2)
         n &= ~(~0u << 8 << 8);
 
@@ -256,7 +256,7 @@ def test_pp_line_in_stat(parser):
     code = """
     void loop(int n) {
         for(int i = 0; i < n; i++){
-            
+
         }
         # 1 "C:\\cparser\\utils\\math.h"
     }
@@ -281,7 +281,7 @@ def test_compound_expressions(parser):
     code = r"""
     int escape(char* in){
         int slashes = 0;
-        
+
         while ((c = *in++) != '\0')
         {
             if (c == '\\')
@@ -291,7 +291,7 @@ def test_compound_expressions(parser):
                 } while ((c = *in++) == '\\');
             }
         }
-        
+
         return slashes;
     }
     """

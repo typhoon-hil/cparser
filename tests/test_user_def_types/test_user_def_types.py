@@ -28,12 +28,12 @@ def test_struc_complex(parser, update):
     code = """
     struct Complex {
         int complex_number;
-        
+
         struct Simple {
             int simple_number;
         } s;
     };
-    
+
     typedef Complex complex_type;
 
     """
@@ -48,7 +48,7 @@ def test_typedef_int(parser, update):
 
     code = """
     typedef int INT_T;
-    
+
     INT_T a = 0;
     """
 
@@ -65,7 +65,7 @@ def test_typedef_stuct(parser, update):
         int x;
         int y;
     } Complex;
-    
+
     Complex c;
     """
 
@@ -82,22 +82,22 @@ def test_struct_pointer(parser, update):
         int x;
         int y;
     }
-    
+
     int main() {
         struct Complex *ptr;
-        
+
         printf("Enter X: ");
         scanf("%d", &(*ptr).x);
 
         printf("Enter Y: ");
         scanf("%d", &(*ptr).y);
-    
+
         printf("Displaying: ");
         printf("%d%d",(*ptr).age, (*ptr).weight);
-        
+
         return 0;
     }
-    
+
     """
 
     tree = parser.parse(code)
@@ -129,7 +129,7 @@ def test_typedef_enum(parser, update):
         kBLSChanged = 1,
         kBLSDeleted = 2,
     } BufhlLineStatus;
-    
+
     BufhlLineStatus status;
     """
 
@@ -167,4 +167,14 @@ def test_typedef_with_ppline(parser, update):
     tree = parser.parse(code)
     file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                              "test_typedef_with_ppline.tree")
+    check_or_update(update, tree, file_path)
+
+
+def test_multiple_decl_specs(parser, update):
+    code = """
+    static const int X = 5;
+    """
+    tree = parser.parse(code)
+    file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                             "test_multiple_decl_specs.tree")
     check_or_update(update, tree, file_path)
