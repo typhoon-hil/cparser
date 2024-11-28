@@ -128,60 +128,66 @@ class CParser:
             This semantic action is used to collect every user-defined type in
             a code. This includes structs, unions and typedefs.
             """
-            declaration = Declaration()
+            def process_declaration(d):
+                declaration = Declaration()
+                if init_decl_list:                    
+                    ddeclarator = d.decl.dd
+                    pos = (ddeclarator._pg_start_position, ddeclarator._pg_end_position)
+                    if hasattr(ddeclarator, "name"):
+                        declaration.name = ddeclarator.name
+                    if hasattr(ddeclarator, "array"):
+                        print(ddeclarator.array)
+                        if not hasattr(ddeclarator.array, "name"):
+                            ddeclarator = ddeclarator.array
+                        declaration.name = ddeclarator.array.name
+                        pos = (
+                            ddeclarator.array._pg_start_position,
+                            ddeclarator.array._pg_end_position,
+                        )
+                else:
+                    pos = (context.start_position, context.end_position)
+                declaration.pos = pos
+                return declaration
+            
+            if not init_decl_list:
+                init_decl_list = []
+                
+            for d in init_decl_list:
+                declaration = process_declaration(d)
+                for spec in specs:
+                    if hasattr(spec, "storage_spec") and spec.storage_spec is not None:
+                        declaration.storage_spec = spec.storage_spec
+                        if spec.storage_spec == "typedef":
+                            self.user_defined_types.add(declaration.name)
 
-            pos = (context.start_position, context.end_position)
+                    if hasattr(spec, "type_spec") and spec.type_spec is not None:
+                        type_spec_pos = (spec._pg_start_position, spec._pg_end_position)
+                        try:
+                            type_spec = spec.type_spec.id
+                            declaration.type_spec = spec.type_spec
+                            if init_decl_list is None:
+                                type_spec_pos = None
+                            self.user_defined_types.add(type_spec)
+                        except AttributeError:
+                            type_spec = spec.type_spec
+                            declaration.type_spec = type_spec
 
-            if init_decl_list:
-                ddeclarator = init_decl_list[0].decl.dd
-                pos = (ddeclarator._pg_start_position, ddeclarator._pg_end_position)
-                if hasattr(ddeclarator, "name"):
-                    declaration.name = ddeclarator.name
-                if hasattr(ddeclarator, "array"):
-                    print(ddeclarator.array)
-                    if not hasattr(ddeclarator.array, "name"):
-                        ddeclarator = ddeclarator.array
-                    declaration.name = ddeclarator.array.name
-                    pos = (
-                        ddeclarator.array._pg_start_position,
-                        ddeclarator.array._pg_end_position,
-                    )
+                        declaration.type_spec_pos = type_spec_pos
+                        if (
+                            type_spec not in BUILTIN_TYPES
+                            and type_spec not in self.user_defined_types
+                            and not declaration.is_typedef
+                        ):
+                            declaration.type_status = TYPE_MAYBE_UNDEFINED
 
-            declaration.pos = pos
-            for spec in specs:
-                if hasattr(spec, "storage_spec") and spec.storage_spec is not None:
-                    declaration.storage_spec = spec.storage_spec
-                    if spec.storage_spec == "typedef":
-                        self.user_defined_types.add(declaration.name)
+                        # Add type to user defined types to avoid ambiguities.
+                        if not declaration.simple_type:
+                            self.user_defined_types.add(type_spec)
 
-                if hasattr(spec, "type_spec") and spec.type_spec is not None:
-                    type_spec_pos = (spec._pg_start_position, spec._pg_end_position)
-                    try:
-                        type_spec = spec.type_spec.id
-                        declaration.type_spec = spec.type_spec
-                        if init_decl_list is None:
-                            type_spec_pos = None
-                        self.user_defined_types.add(type_spec)
-                    except AttributeError:
-                        type_spec = spec.type_spec
-                        declaration.type_spec = type_spec
+                    if hasattr(spec, "type_qual") and spec.type_qual is not None:
+                        declaration.type_qual = spec.type_qual
 
-                    declaration.type_spec_pos = type_spec_pos
-                    if (
-                        type_spec not in BUILTIN_TYPES
-                        and type_spec not in self.user_defined_types
-                        and not declaration.is_typedef
-                    ):
-                        declaration.type_status = TYPE_MAYBE_UNDEFINED
-
-                    # Add type to user defined types to avoid ambiguities.
-                    if not declaration.simple_type:
-                        self.user_defined_types.add(type_spec)
-
-                if hasattr(spec, "type_qual") and spec.type_qual is not None:
-                    declaration.type_qual = spec.type_qual
-
-            self.declarations[pos] = declaration
+                self.declarations[declaration.pos] = declaration
 
         def function_definition(
             context, nodes, declarator, decl_specs=None, decl_list=None, body=None
