@@ -278,6 +278,10 @@ class CParser:
                     c = 2
 
         """
+
+        # We would expect disambiguate to be called for typedef_name-primary_exp 
+        print("Disambiguate called")
+
         # assume all possibilities are valid, and remove those that are not.
         valid = list(parent.possibilities)
         user_def_symbols = self.user_defined_types
