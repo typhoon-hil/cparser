@@ -10,7 +10,11 @@ from cparser import CParser
 # before the decl_body action gets called?
 
 code = """
+void fn(int a) {
+}
+
 int main() {
+    int x;
     fn(x);
 }
 """
@@ -22,127 +26,67 @@ def main():
 
 
     """
-    Declaration body action called
-    Added fn to user_defined_types
-    Function definition action for 'main' called
-    Disambiguate called
-    block_item
-
-    block_item
-    decl
-    decl_body
-    decl_specs
-    decl_specs_g1_1
-    decl_specs_g1
-    type_spec
-    typedef_name
-    id
-    init_declarator_list_opt
-    init_declarator_list
-    init_declarator_1_comma
-    init_declarator
-    declarator
-    pointer_opt
-    direct_declarator
-    (
-    declarator
-    pointer_opt
-    direct_declarator
-    id
-    )
-    ;
-    block_item
-
-    block_item
-    stat
-    exp_stat
-    exp_opt
-    exp
-    assignment_exp
-    conditional_exp
-    logical_or_exp
-    logical_and_exp
-    inclusive_or_exp
-    exclusive_or_exp
-    and_exp
-    equality_exp
-    relational_exp
-    shift_expression
-    additive_exp
-    mult_exp
-    cast_exp
-    unary_exp
-    postfix_exp
-    postfix_exp
-    primary_exp
-    id
-    (
-    assignment_exp_0_comma
-    assignment_exp_1_comma
-    assignment_exp
-    conditional_exp
-    logical_or_exp
-    logical_and_exp
-    inclusive_or_exp
-    exclusive_or_exp
-    and_exp
-    equality_exp
-    relational_exp
-    shift_expression
-    additive_exp
-    mult_exp
-    cast_exp
-    unary_exp
-    postfix_exp
-    primary_exp
-    id
-    )
-    ;
-
-translation_unit[1->26]
-  external_decl_1[1->26]
-    external_decl[1->26]
-      function_definition[1->26]
-        decl_specs[1->4]
-          decl_specs_g1_1[1->4]
-            decl_specs_g1[1->4]
-              type_spec[1->4]
-                int[1->4, "int"]
-        declarator[5->11]
-          pointer_opt[5->5]
-          direct_declarator[5->11]
-            direct_declarator[5->9]
-              id[5->9, "main"]
-            ([9->10, "("]
-            )[10->11, ")"]
-        compound_stat[12->26]
-          {[12->13, "{"]
-          block_item_0[18->24]
-            block_item_1[18->24]
-              block_item[18->24]
-                decl[18->24]
-                  decl_body[18->23]
-                    decl_specs[18->20]
-                      decl_specs_g1_1[18->20]
-                        decl_specs_g1[18->20]
-                          type_spec[18->20]
-                            typedef_name[18->20]
-                              id[18->20, "fn"]
-                    init_declarator_list_opt[20->23]
-                      init_declarator_list[20->23]
-                        init_declarator_1_comma[20->23]
-                          init_declarator[20->23]
-                            declarator[20->23]
-                              pointer_opt[20->20]
-                              direct_declarator[20->23]
-                                ([20->21, "("]
-                                declarator[21->22]
-                                  pointer_opt[21->21]
-                                  direct_declarator[21->22]
-                                    id[21->22, "x"]
-                                )[22->23, ")"]
-                  ;[23->24, ";"]
-          }[25->26, "}"]
+    ...
+    external_decl[21->57]
+      function_definition[21->57]
+        decl_specs[21->24]
+          decl_specs_g1_1[21->24]
+            decl_specs_g1[21->24]
+              type_spec[21->24]
+                int[21->24, "int"]
+        declarator[25->31]
+          pointer_opt[25->25]
+          direct_declarator[25->31]
+            direct_declarator[25->29]
+              id[25->29, "main"]
+            ([29->30, "("]
+            )[30->31, ")"]
+        compound_stat[32->57]
+          {[32->33, "{"]
+          block_item_0[38->55]
+            block_item_1[38->55]
+              block_item_1[38->44]
+                block_item[38->44]
+                  decl[38->44]
+                    decl_body[38->43]
+                      decl_specs[38->41]
+                        decl_specs_g1_1[38->41]
+                          decl_specs_g1[38->41]
+                            type_spec[38->41]
+                              int[38->41, "int"]
+                      init_declarator_list_opt[42->43]
+                        init_declarator_list[42->43]
+                          init_declarator_1_comma[42->43]
+                            init_declarator[42->43]
+                              declarator[42->43]
+                                pointer_opt[42->42]
+                                direct_declarator[42->43]
+                                  id[42->43, "x"]
+                    ;[43->44, ";"]
+              block_item[49->55]
+                decl[49->55]
+                  decl_body[49->54]
+                    decl_specs[49->51]
+                      decl_specs_g1_1[49->51]
+                        decl_specs_g1[49->51]
+                          type_spec[49->51]
+                            typedef_name[49->51]
+                              id[49->51, "fn"]
+                    init_declarator_list_opt[51->54]
+                      init_declarator_list[51->54]
+                        init_declarator_1_comma[51->54]
+                          init_declarator[51->54]
+                            declarator[51->54]
+                              pointer_opt[51->51]
+                              direct_declarator[51->54]
+                                ([51->52, "("]
+                                declarator[52->53]
+                                  pointer_opt[52->52]
+                                  direct_declarator[52->53]
+                                    id[52->53, "x"]
+                                )[53->54, ")"]
+                  ;[54->55, ";"]
+          }[56->57, "}"]
     """
 
 
