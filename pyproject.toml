@@ -1,0 +1,85 @@
+[project]
+name = "cparser"
+version = "0.5.1"
+description = "C Parser written in pure Python"
+authors = [
+    {name = "Typhoon HIL, Inc", email = "office@typhoon-hil.com"}
+]
+maintainers = [
+    {name = "Typhoon HIL, Inc", email = "office@typhoon-hil.com"}
+]
+readme = "README.rst"
+license = {text = "MIT"}
+keywords = ["parser", "GLR", "C"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+requires-python = ">=3.8"
+dependencies = [
+    "parglare>=0.16,<0.17"
+]
+
+[project.urls]
+Homepage = "https://github.com/typhoon-hil/cparser"
+Repository = "https://github.com/typhoon-hil/cparser"
+Changelog = "https://github.com/typhoon-hil/cparser/blob/master/CHANGELOG.md"
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.8.0,<4"]
+
+[tool.flit.module]
+name = "cparser"
+
+[tool.flit.sdist]
+exclude = ["**/.*"]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "flit",
+]
+
+test = [
+    "ruff",
+    "coverage",
+    "coveralls",
+    "pytest"
+]
+
+[tool.ruff]
+line-length = 90
+indent-width = 4
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/linter/#rule-selection
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

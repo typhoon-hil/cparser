@@ -1,7 +1,7 @@
+import importlib.metadata
 from cparser.parser import CParser
-from cparser.version import get_version
 
-__version__ = get_version()
+__version__ = importlib.metadata.version("cparser")
 
 
 def parse_file(file_path, use_cpp=False, cpp_path="cpp",
