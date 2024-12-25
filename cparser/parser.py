@@ -208,6 +208,10 @@ class CParser:
         self._glr.debug = debug
 
         forest = self._glr.parse(code)
+        # Use this to diff trees and investigate ambiguities
+        # for idx, tree in enumerate(forest):
+        #     with open(f'tree{idx}.ast', 'w') as f:
+        #         f.write(tree.to_str())
 
         if debug:
             with open("debug.dot", "w") as f:
@@ -316,7 +320,10 @@ class CParser:
 
                         token_value = node.children[0].token.value
                         if token_value in user_def_symbols and pos in valid:
-                            valid.remove(pos)
+                            if token_value in self.functions.values():
+                                valid = [pos]
+                            else:
+                                valid.remove(pos)
                             break
 
                 if pos.symbol.name == "iteration_stat":
