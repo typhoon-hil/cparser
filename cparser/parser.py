@@ -118,6 +118,9 @@ class CParser:
         """
 
         def primary_exp(context, nodes, var_ref=None):
+            
+            print("Primary expression action called")
+
             pos = (context.start_position, context.end_position)
             if var_ref is not None:
                 self.var_refs[pos] = var_ref
@@ -128,6 +131,9 @@ class CParser:
             This semantic action is used to collect every user-defined type in
             a code. This includes structs, unions and typedefs.
             """
+
+            print("Declaration body action called")
+            
             def process_declaration(d):
                 declaration = Declaration()
                 if init_decl_list:                    
@@ -158,6 +164,7 @@ class CParser:
                     if hasattr(spec, "storage_spec") and spec.storage_spec is not None:
                         declaration.storage_spec = spec.storage_spec
                         if spec.storage_spec == "typedef":
+                            print(f"Added {declaration.name} to user_defined_types")
                             self.user_defined_types.add(declaration.name)
 
                     if hasattr(spec, "type_spec") and spec.type_spec is not None:
@@ -167,6 +174,7 @@ class CParser:
                             declaration.type_spec = spec.type_spec
                             if init_decl_list is None:
                                 type_spec_pos = None
+                            print(f"Added {type_spec} to user_defined_types")
                             self.user_defined_types.add(type_spec)
                         except AttributeError:
                             type_spec = spec.type_spec
@@ -182,6 +190,7 @@ class CParser:
 
                         # Add type to user defined types to avoid ambiguities.
                         if not declaration.simple_type:
+                            print(f"Added {type_spec} to user_defined_types")
                             self.user_defined_types.add(type_spec)
 
                     if hasattr(spec, "type_qual") and spec.type_qual is not None:
@@ -192,6 +201,7 @@ class CParser:
         def function_definition(
             context, nodes, declarator, decl_specs=None, decl_list=None, body=None
         ):
+            print(f"Function definition action for '{declarator.dd.fnc_decl.name}' called")
             pos = (context.start_position, context.end_position)
             self.functions[pos] = declarator.dd.fnc_decl.name
 
@@ -279,7 +289,6 @@ class CParser:
 
         """
 
-        # We would expect disambiguate to be called for typedef_name-primary_exp 
         print("Disambiguate called")
 
         # assume all possibilities are valid, and remove those that are not.
@@ -293,6 +302,9 @@ class CParser:
                 # For each possibility, descend down the sub-tree.
 
                 if isinstance(node, Node):
+                    
+                    print(node.symbol.name)
+
                     if node.symbol.name == "typedef_name":
                         token_value = node.children[0].token.value
                         if token_value not in user_def_symbols and pos in valid:
@@ -330,7 +342,12 @@ class CParser:
                 for n in node:
                     traverse_tree(n)
 
+            print(pos.symbol.name)
+            print()
+
             traverse_tree(pos)
+
+
 
         parent.possibilities = valid
 
