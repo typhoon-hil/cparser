@@ -1,6 +1,6 @@
 [project]
 name = "cparser"
-version = "0.5.1"
+version = "0.5.2"
 description = "C Parser written in pure Python"
 authors = [
     {name = "Typhoon HIL, Inc", email = "office@typhoon-hil.com"}
