@@ -1,4 +1,5 @@
 import os
+import collections
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
 BUILTIN_TYPES = (
@@ -207,6 +208,10 @@ class CParser:
         self._glr.debug = debug
 
         forest = self._glr.parse(code)
+        # Use this to diff trees and investigate ambiguities
+        # for idx, tree in enumerate(forest):
+        #     with open(f'tree{idx}.ast', 'w') as f:
+        #         f.write(tree.to_str())
 
         if debug:
             with open("debug.dot", "w") as f:
@@ -251,10 +256,10 @@ class CParser:
 
         typedef_name & primary_exp disambiguations
         ------------------------------------------
-        Whenever the REDUCE is called on typedef_name or primary_exp rule,
-        we first check if the ID that is trying to be reduced is actually a
-        user-defined type (struct, union, typedef). If yes, than the REDUCE
-        will be called.
+        Whenever the REDUCE is called on typedef_name or primary_exp rule
+        (variable ref.), we first check if the ID that is trying to be reduced
+        is actually a user-defined type (struct, union, typedef). If yes, than
+        the REDUCE will be called.
 
         iteration_stat disambiguation
         -----------------------------
@@ -283,50 +288,63 @@ class CParser:
         user_def_symbols = self.user_defined_types
 
         for pos in parent:
+            queue = collections.deque([pos])
             is_selection_stat = pos.symbol.name == "selection_stat"
 
-            def traverse_tree(node):
-                # For each possibility, descend down the sub-tree.
-
-                if isinstance(node, Node):
-                    if node.symbol.name == "typedef_name":
-                        token_value = node.children[0].token.value
-                        if token_value not in user_def_symbols and pos in valid:
-                            valid.remove(pos)
-
-                    if node.symbol.name == "direct_declarator":
-                        if len(node.children) == 1:
-                            token_value = node.children[0].token.value
-                            if token_value in user_def_symbols and pos in valid:
-                                valid.remove(pos)
-
-                    if node.symbol.name == "primary_exp":
-                        child = node.children[0]
-                        if child.symbol.name != "cconst":
-
-                            token_value = node.children[0].token.value
-                            if token_value in user_def_symbols and pos in valid:
-                                valid.remove(pos)
-
-                    if pos.symbol.name == "iteration_stat":
-                        if node.symbol.name == "init_declarator_list_opt":
-                            if len(node.children) == 0:
-                                valid.remove(pos)
-
-                    if is_selection_stat:
-                        has_else = len(pos.children) > 5
-                        # If `pos` node has an else clause, and it's child node
-                        # is also an if-clause, then the else clause should be
-                        # attached to the child node. Hence, we discard this
-                        # pos.
-                        if node.symbol.name == "selection_stat" and has_else:
-                            if pos in valid:
-                                valid.remove(pos)
-
+            while queue:
+                node = queue.popleft()
                 for n in node:
-                    traverse_tree(n)
+                    queue.append(n)
 
-            traverse_tree(pos)
+                if not isinstance(node, Node):
+                    continue
+
+                print('Traversing ', node.symbol.name)
+
+                if node.symbol.name == "typedef_name":
+                    token_value = node.children[0].token.value
+                    if token_value not in user_def_symbols and pos in valid:
+                        valid.remove(pos)
+                        break
+
+                if node.symbol.name == "direct_declarator":
+                    if len(node.children) == 1:
+                        token_value = node.children[0].token.value
+                        if token_value in user_def_symbols and pos in valid:
+                            valid.remove(pos)
+                            break
+
+                if node.symbol.name == "primary_exp":
+                    child = node.children[0]
+                    if child.symbol.name != "cconst":
+
+                        token_value = node.children[0].token.value
+                        if token_value in user_def_symbols and pos in valid:
+                            if token_value in self.functions.values():
+                                valid = [pos]
+                            else:
+                                valid.remove(pos)
+                            break
+
+                if pos.symbol.name == "iteration_stat":
+                    if node.symbol.name == "init_declarator_list_opt":
+                        if len(node.children) == 0:
+                            valid.remove(pos)
+                            break
+
+                if is_selection_stat:
+                    has_else = len(pos.children) > 5
+                    # If `pos` node has an else clause, and it's child node
+                    # is also an if-clause, then the else clause should be
+                    # attached to the child node. Hence, we discard this
+                    # pos.
+                    if node.symbol.name == "selection_stat" and has_else:
+                        if pos in valid:
+                            valid.remove(pos)
+                            break
+
+            print(pos.symbol.name)
+            print()
 
         parent.possibilities = valid
 
