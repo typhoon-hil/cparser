@@ -9,6 +9,22 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## [0.5.2] - 2024.12.27
+
+### Fixed
+
+- Single parameter function calls are now properly parsed as primary expressions (primary_exp) instead of declarations (decl).
+
+### Changed
+
+- Migrated setup to `pyproject.toml`
+
+## [0.5.1] - 2024.11.28
+
+### Fixed
+
+- C declaration lists (e.g. C code `float a, b, c;`) are now properly parsed into `parser.declarations`.
+
 ## [0.5.0] - 2024.10.08
 
 ### Added
