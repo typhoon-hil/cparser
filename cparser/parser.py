@@ -137,7 +137,6 @@ class CParser:
                     if hasattr(ddeclarator, "name"):
                         declaration.name = ddeclarator.name
                     if hasattr(ddeclarator, "array"):
-                        print(ddeclarator.array)
                         if not hasattr(ddeclarator.array, "name"):
                             ddeclarator = ddeclarator.array
                         declaration.name = ddeclarator.array.name
@@ -299,8 +298,6 @@ class CParser:
                 if not isinstance(node, Node):
                     continue
 
-                print('Traversing ', node.symbol.name)
-
                 if node.symbol.name == "typedef_name":
                     token_value = node.children[0].token.value
                     if token_value not in user_def_symbols and pos in valid:
@@ -342,9 +339,6 @@ class CParser:
                         if pos in valid:
                             valid.remove(pos)
                             break
-
-            print(pos.symbol.name)
-            print()
 
         parent.possibilities = valid
 
