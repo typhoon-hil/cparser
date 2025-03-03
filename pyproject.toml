@@ -32,7 +32,7 @@ classifiers = [
 
 requires-python = ">=3.8"
 dependencies = [
-    "parglare>=0.16,<0.17"
+    "parglare==0.18"
 ]
 
 [project.urls]
