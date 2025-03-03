@@ -42,7 +42,7 @@ Changelog = "https://github.com/typhoon-hil/cparser/blob/master/CHANGELOG.md"
 
 [build-system]
 build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.8.0,<4"]
+requires = ["flit_core >=3.11.0,<4"]
 
 [tool.flit.module]
 name = "cparser"
