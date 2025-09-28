@@ -137,7 +137,7 @@ class CParser:
                     if hasattr(ddeclarator, "name"):
                         declaration.name = ddeclarator.name
                     if hasattr(ddeclarator, "array"):
-                        if not hasattr(ddeclarator.array, "name"):
+                        while not hasattr(ddeclarator.array, "name"):
                             ddeclarator = ddeclarator.array
                         declaration.name = ddeclarator.array.name
                         pos = (
