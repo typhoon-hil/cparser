@@ -1,5 +1,6 @@
 import os
 import collections
+from itertools import islice
 from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
 
 BUILTIN_TYPES = (
@@ -205,7 +206,7 @@ class CParser:
 
         forest = self._glr.parse(code)
         # Use this to diff trees and investigate ambiguities
-        # for idx, tree in enumerate(forest):
+        # for idx, tree in islice(enumerate(forest), 0, 5):
         #     with open(f'tree{idx}.ast', 'w') as f:
         #         f.write(tree.to_str())
 
