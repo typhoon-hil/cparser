@@ -175,7 +175,7 @@ compound_stat               : '{' block_item* '}'
 //                            | stat_list stat
 //                            ;
 
-selection_stat              : 'if' '(' exp ')' stat
+selection_stat              : 'if' '(' exp ')' stat  {shift}  // make 'else' binds to inner if
                             | 'if' '(' exp ')' stat 'else' stat
                             | 'switch' '(' exp ')' stat
                             ;

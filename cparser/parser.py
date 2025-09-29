@@ -251,7 +251,6 @@ class CParser:
             * typedef_name
             * primary_exp
             * iteration_stat
-            * the dangling else
 
         typedef_name & primary_exp disambiguations
         ------------------------------------------
@@ -269,17 +268,6 @@ class CParser:
         Ambiguity happens because part `i = 0` can be recognized both as exp_opt
         and init_declarator_list_opt. In this case, part `i = 0` is always
         reduced to init_declarator_list_opt rule.
-
-        The dangling else disambiguation
-        --------------------------------
-        In the following example, `else` statement should belong to the nearest
-        if-clause (in this case it is `if (b < 5)`):
-        Example:
-            if (a > 10)
-                if (b < 5)
-                    c = 1
-                else
-                    c = 2
 
         """
         # assume all possibilities are valid, and remove those that are not.
@@ -329,17 +317,6 @@ class CParser:
                 if possibility.symbol.name == "iteration_stat":
                     if node.symbol.name == "init_declarator_list_opt":
                         if len(node.children) == 0:
-                            valid.remove(possibility)
-                            break
-
-                if is_selection_stat:
-                    has_else = len(possibility.children) > 5
-                    # If `possibility` node has an else clause, and it's child
-                    # node is also an if-clause, then the else clause should be
-                    # attached to the child node. Hence, we discard this
-                    # possibility.
-                    if node.symbol.name == "selection_stat" and has_else:
-                        if possibility in valid:
                             valid.remove(possibility)
                             break
 
