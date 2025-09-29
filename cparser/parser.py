@@ -131,21 +131,18 @@ class CParser:
             """
             def process_declaration(d):
                 declaration = Declaration()
-                if init_decl_list:                    
-                    ddeclarator = d.decl.dd
-                    pos = (ddeclarator._pg_start_position, ddeclarator._pg_end_position)
-                    if hasattr(ddeclarator, "name"):
-                        declaration.name = ddeclarator.name
-                    if hasattr(ddeclarator, "array"):
-                        while not hasattr(ddeclarator.array, "name"):
-                            ddeclarator = ddeclarator.array
-                        declaration.name = ddeclarator.array.name
-                        pos = (
-                            ddeclarator.array._pg_start_position,
-                            ddeclarator.array._pg_end_position,
-                        )
-                else:
-                    pos = (context.start_position, context.end_position)
+                ddeclarator = d.decl.dd
+                pos = (ddeclarator._pg_start_position, ddeclarator._pg_end_position)
+                if hasattr(ddeclarator, "name"):
+                    declaration.name = ddeclarator.name
+                if hasattr(ddeclarator, "array"):
+                    while not hasattr(ddeclarator.array, "name"):
+                        ddeclarator = ddeclarator.array
+                    declaration.name = ddeclarator.array.name
+                    pos = (
+                        ddeclarator.array._pg_start_position,
+                        ddeclarator.array._pg_end_position,
+                    )
                 declaration.pos = pos
                 return declaration
             
@@ -165,8 +162,8 @@ class CParser:
                         try:
                             type_spec = spec.type_spec.id
                             declaration.type_spec = spec.type_spec
-                            if init_decl_list is None:
-                                type_spec_pos = None
+                            type_spec_pos = (spec.type_spec._pg_start_position,
+                                             spec.type_spec._pg_end_position)
                             self.user_defined_types.add(type_spec)
                         except AttributeError:
                             type_spec = spec.type_spec
