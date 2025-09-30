@@ -137,7 +137,7 @@ class CParser:
                     if hasattr(ddeclarator, "name"):
                         declaration.name = ddeclarator.name
                     if hasattr(ddeclarator, "array"):
-                        if not hasattr(ddeclarator.array, "name"):
+                        while not hasattr(ddeclarator.array, "name"):
                             ddeclarator = ddeclarator.array
                         declaration.name = ddeclarator.array.name
                         pos = (
@@ -266,9 +266,9 @@ class CParser:
         block. For example:
             for (int i = 0; ...)
 
-        Disambiguity happens because part `i = 0` can be recognized
-        both as exp_opt and init_declarator_list_opt. In this case, part
-        `i = 0` is always reduced to init_declarator_list_opt rule.
+        Ambiguity happens because part `i = 0` can be recognized both as exp_opt
+        and init_declarator_list_opt. In this case, part `i = 0` is always
+        reduced to init_declarator_list_opt rule.
 
         The dangling else disambiguation
         --------------------------------
@@ -286,9 +286,12 @@ class CParser:
         valid = list(parent.possibilities)
         user_def_symbols = self.user_defined_types
 
-        for pos in parent:
-            queue = collections.deque([pos])
-            is_selection_stat = pos.symbol.name == "selection_stat"
+        for possibility in parent:
+            queue = collections.deque([possibility])
+            is_selection_stat = possibility.symbol.name == "selection_stat"
+
+            if len(valid) == 1:
+                break
 
             while queue:
                 node = queue.popleft()
@@ -300,15 +303,15 @@ class CParser:
 
                 if node.symbol.name == "typedef_name":
                     token_value = node.children[0].token.value
-                    if token_value not in user_def_symbols and pos in valid:
-                        valid.remove(pos)
+                    if token_value not in user_def_symbols and possibility in valid:
+                        valid.remove(possibility)
                         break
 
                 if node.symbol.name == "direct_declarator":
                     if len(node.children) == 1:
                         token_value = node.children[0].token.value
-                        if token_value in user_def_symbols and pos in valid:
-                            valid.remove(pos)
+                        if token_value in user_def_symbols and possibility in valid:
+                            valid.remove(possibility)
                             break
 
                 if node.symbol.name == "primary_exp":
@@ -316,28 +319,28 @@ class CParser:
                     if child.symbol.name != "cconst":
 
                         token_value = node.children[0].token.value
-                        if token_value in user_def_symbols and pos in valid:
+                        if token_value in user_def_symbols and possibility in valid:
                             if token_value in self.functions.values():
-                                valid = [pos]
+                                valid = [possibility]
                             else:
-                                valid.remove(pos)
+                                valid.remove(possibility)
                             break
 
-                if pos.symbol.name == "iteration_stat":
+                if possibility.symbol.name == "iteration_stat":
                     if node.symbol.name == "init_declarator_list_opt":
                         if len(node.children) == 0:
-                            valid.remove(pos)
+                            valid.remove(possibility)
                             break
 
                 if is_selection_stat:
-                    has_else = len(pos.children) > 5
-                    # If `pos` node has an else clause, and it's child node
-                    # is also an if-clause, then the else clause should be
+                    has_else = len(possibility.children) > 5
+                    # If `possibility` node has an else clause, and it's child
+                    # node is also an if-clause, then the else clause should be
                     # attached to the child node. Hence, we discard this
-                    # pos.
+                    # possibility.
                     if node.symbol.name == "selection_stat" and has_else:
-                        if pos in valid:
-                            valid.remove(pos)
+                        if possibility in valid:
+                            valid.remove(possibility)
                             break
 
         parent.possibilities = valid
