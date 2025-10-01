@@ -214,6 +214,8 @@ class CParser:
             with open("debug.dot", "w") as f:
                 f.write(forest.to_dot())
 
+        forest.disambiguate(self.disambiguate_first_pass)
+
         # Collect user-defined types
         self._glr.call_actions(forest.get_first_tree())
 
@@ -226,6 +228,11 @@ class CParser:
         if debug:
             with open("debug2.dot", "w") as f:
                 f.write(forest.to_dot())
+
+        if len(forest) > 1:
+            for idx, tree in islice(enumerate(forest), 0, 5):
+                with open(f'tree{idx}.ast', 'w') as f:
+                    f.write(tree.to_str())
 
         assert len(forest) == 1
         return forest.get_first_tree()
@@ -241,6 +248,41 @@ class CParser:
                 content = f.read()
 
         return self.parse(content, debug)
+
+    def disambiguate_first_pass(self, parent):
+        """Filter for dynamic disambiguation - first pass.
+
+        Disambiguates context-free cases that don't require declared type
+        information. This should remove all ambiguities in declarations.
+
+        """
+        # Use this to investigate ambiguities in this disambiguation call.
+        # for idx, tree in enumerate(parent.possibilities):
+        #     with open(f'ambig{idx}.ast', 'w') as f:
+        #         f.write(tree.to_str())
+        from parglare.trees import tree_node_iterator, visitor
+
+        def is_non_empty_init_declarator_list(node):
+            """
+            True if decl_body->init_declarator_list is non-empty.
+
+            We prioritize init_declarator_list over decl_specs for
+            typedefs of the form:
+
+            typedef A B;
+
+            where B should be recognized as init_declarator, not decl_spec.
+            """
+            assert(len(node.children[-1].possibilities) == 1)
+            return len(node.children[-1].possibilities[0].children) > 0
+
+        valid = parent.possibilities
+        if parent.production.symbol.name == 'decl_body':
+           # Prefer declaration which ends with non-empty init_decl_list
+           valid = list(filter(is_non_empty_init_declarator_list, valid))
+
+        if len(valid) > 0:
+            parent.possibilities = valid
 
     def disambiguate(self, parent):
         """Filter for dynamic disambiguation
@@ -287,18 +329,18 @@ class CParser:
                 if not isinstance(node, Node):
                     continue
 
-                if node.symbol.name == "typedef_name":
-                    token_value = node.children[0].token.value
-                    if token_value not in user_def_symbols and possibility in valid:
-                        valid.remove(possibility)
-                        break
+                # if node.symbol.name == "typedef_name":
+                #     token_value = node.children[0].token.value
+                #     if token_value not in user_def_symbols and possibility in valid:
+                #         valid.remove(possibility)
+                #         break
 
-                if node.symbol.name == "direct_declarator":
-                    if len(node.children) == 1:
-                        token_value = node.children[0].token.value
-                        if token_value in user_def_symbols and possibility in valid:
-                            valid.remove(possibility)
-                            break
+                # if node.symbol.name == "direct_declarator":
+                #     if len(node.children) == 1:
+                #         token_value = node.children[0].token.value
+                #         if token_value in user_def_symbols and possibility in valid:
+                #             valid.remove(possibility)
+                #             break
 
                 if node.symbol.name == "primary_exp":
                     child = node.children[0]

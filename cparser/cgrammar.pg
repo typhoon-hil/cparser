@@ -24,7 +24,7 @@ function_definition         : decl_specs=decl_specs declarator=declarator decl_l
 decl                        : decl_body ';'
                             ;
 
-decl_body                   : specs=decl_specs init_decl_list=init_declarator_list?
+decl_body                   : specs=decl_specs init_decl_list=init_declarator_list? {dynamic}
                             ;
 
 decl_list                   : decl+
