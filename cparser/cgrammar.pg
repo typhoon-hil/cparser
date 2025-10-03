@@ -24,7 +24,7 @@ function_definition         : decl_specs=decl_specs declarator=declarator decl_l
 decl                        : decl_body ';'
                             ;
 
-decl_body                   : specs=decl_specs init_decl_list=init_declarator_list? {dynamic}
+decl_body                   : specs=decl_specs init_decl_list=init_declarator_list?
                             ;
 
 decl_list                   : decl+
@@ -143,7 +143,7 @@ direct_abstract_declarator  : '(' abstract_declarator ')'
                             | '('    ')'
                             ;
 
-typedef_name                : id {dynamic};
+typedef_name                : id;
 
 stat                        : labeled_stat
                             | exp_stat
@@ -183,7 +183,7 @@ selection_stat              : 'if' '(' exp ')' stat  {shift}  // make 'else' bin
 iteration_stat              : 'while' '(' exp ')' stat
                             | 'do' stat 'while' '(' exp ')' ';'
                             | 'for' '(' exp? ';' exp? ';' exp? ')' stat
-                            | 'for' '(' decl_body exp?';' exp? ';' exp? ')' stat {dynamic}
+                            | 'for' '(' decl_body exp?';' exp? ';' exp? ')' stat
                             ;
 
 jump_stat                   : 'goto' id ';'
@@ -289,7 +289,7 @@ postfix_exp                 : primary_exp
                             | postfix_exp '--'
                             ;
 
-primary_exp                 : var_ref=id {dynamic}
+primary_exp                 : var_ref=id
                             | cconst
                             | adj_strings
                             | '(' exp ')'
