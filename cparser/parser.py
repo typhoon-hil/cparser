@@ -1,7 +1,11 @@
-import os
 import collections
+import os
 from itertools import islice
-from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm, REDUCE, Node
+from typing import Callable, List, TypeVar
+
+from parglare import GLRParser, Grammar, Node, NodeNonTerm, NodeTerm
+from parglare.glr import Parent
+from parglare.trees import tree_node_iterator, visitor
 
 BUILTIN_TYPES = (
     "void",
@@ -124,7 +128,7 @@ class CParser:
             if var_ref is not None:
                 self.var_refs[pos] = var_ref
 
-        def decl_body(context, nodes, specs, init_decl_list):
+        def decl_body(context, nodes, decl_specs, init_decl_list):
             """Semantic action called for every decl_body production
 
             This semantic action is used to collect every user-defined type in
@@ -152,7 +156,7 @@ class CParser:
                 
             for d in init_decl_list:
                 declaration = process_declaration(d)
-                for spec in specs:
+                for spec in decl_specs:
                     if hasattr(spec, "storage_spec") and spec.storage_spec is not None:
                         declaration.storage_spec = spec.storage_spec
                         if spec.storage_spec == "typedef":
@@ -260,26 +264,63 @@ class CParser:
         # for idx, tree in enumerate(parent.possibilities):
         #     with open(f'ambig{idx}.ast', 'w') as f:
         #         f.write(tree.to_str())
-        from parglare.trees import tree_node_iterator, visitor
+        #
+        def tree_size(root):
+            """Returns number of nodes in the given tree."""
+            if isinstance(root, NodeNonTerm):
+                return sum(tree_size(c) for c in root.children)
+            elif isinstance(root, NodeTerm):
+                return 1
+            elif isinstance(root, Parent):
+                assert len(root.possibilities) == 1
+                return tree_size(root.possibilities[0])
+            else:
+                Exception(f'tree_size called '
+                            f'for invalid type: {root.__class__}')
+            return 0
 
-        def is_non_empty_init_declarator_list(node):
+
+        T = TypeVar('T')
+
+        def larger_tree_strategy(trees: List[T], get_tree_size: Callable) -> List[T]:
+            """Strategy where disambiguation is done by choosing largest trees.
+
+            Returns disambiguated trees list.
+
             """
-            True if decl_body->init_declarator_list is non-empty.
-
-            We prioritize init_declarator_list over decl_specs for
-            typedefs of the form:
-
-            typedef A B;
-
-            where B should be recognized as init_declarator, not decl_spec.
-            """
-            assert(len(node.children[-1].possibilities) == 1)
-            return len(node.children[-1].possibilities[0].children) > 0
+            tree_sizes = list(sorted([(t, get_tree_size(t)) for t in trees],
+                                key=lambda ts: ts[1], reverse=True))
+            first_size = tree_sizes[0][1]
+            return [t[0] for t in tree_sizes if t[1] == first_size]
+            
 
         valid = parent.possibilities
-        if parent.production.symbol.name == 'decl_body':
-           # Prefer declaration which ends with non-empty init_decl_list
-           valid = list(filter(is_non_empty_init_declarator_list, valid))
+        # Sanity check
+        assert len(valid) > 1
+
+        symbol_name = parent.production.symbol.name
+
+        if symbol_name in ['decl_body', 'param_decl']:
+            # Prefer declarations over type specification
+            # E.g. we prioritize init_declarator_list over decl_specs for typedefs of
+            # the form:
+            # typedef A B;
+            # where B should be recognized as init_declarator, not decl_spec.
+            valid = larger_tree_strategy(valid, lambda t: tree_size(t.children[-1]))
+
+        elif symbol_name == 'function_definition':
+            # Prefer function_definition with larger declarator AST size
+            def decl_tree_size(func_decl):
+                """Returns declarator tree size"""
+                declarator_index = 0
+                try:
+                    declarator_index = next(i for i, st in enumerate(func_decl.children)
+                                            if st.production.symbol.name == 'declarator')
+                except StopIteration:
+                    return 0
+                return tree_size(func_decl.children[declarator_index])
+
+            valid = larger_tree_strategy(valid, lambda t: decl_tree_size(t))
 
         if len(valid) > 0:
             parent.possibilities = valid
@@ -316,7 +357,6 @@ class CParser:
 
         for possibility in parent:
             queue = collections.deque([possibility])
-            is_selection_stat = possibility.symbol.name == "selection_stat"
 
             if len(valid) == 1:
                 break
@@ -328,19 +368,6 @@ class CParser:
 
                 if not isinstance(node, Node):
                     continue
-
-                # if node.symbol.name == "typedef_name":
-                #     token_value = node.children[0].token.value
-                #     if token_value not in user_def_symbols and possibility in valid:
-                #         valid.remove(possibility)
-                #         break
-
-                # if node.symbol.name == "direct_declarator":
-                #     if len(node.children) == 1:
-                #         token_value = node.children[0].token.value
-                #         if token_value in user_def_symbols and possibility in valid:
-                #             valid.remove(possibility)
-                #             break
 
                 if node.symbol.name == "primary_exp":
                     child = node.children[0]

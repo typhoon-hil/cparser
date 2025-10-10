@@ -1,9 +1,10 @@
 # Tests for regression reported in issue #13
 # https://github.com/typhoon-hil/cparser/issues/13
 import os
-import pytest  # noqa
-from tests.utils import check_or_update
 
+import pytest  # noqa
+
+from tests.utils import check_or_update
 
 test_data = [
     ('struct_defined_field',
@@ -49,7 +50,7 @@ test_data = [
 
 
 @pytest.mark.parametrize("name, code", test_data)
-def test_issue_13(name, code, parser, update):
+def test_typedef_ambiguity(name, code, parser, update):
     tree = parser.parse(code)
     file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
                              f"{name}.tree")

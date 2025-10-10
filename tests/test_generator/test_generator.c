@@ -1,5 +1,5 @@
-typedef struct { int  element ; int  weight ; } Atom  ;
- typedef int int_T  ;
+typedef struct { int  element ; int  weight ; }  Atom;
+ typedef int  int_T;
  Atom  helium;
  int  a = 5;
  int  main ( int  argc , const char  *  *  argv  ) {
