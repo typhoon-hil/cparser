@@ -328,27 +328,13 @@ class CParser:
     def disambiguate(self, parent):
         """Filter for dynamic disambiguation
 
-        Solves problems with following disambiguations:
-            * typedef_name
-            * primary_exp
-            * iteration_stat
-
-        typedef_name & primary_exp disambiguations
+        primary_exp disambiguations
         ------------------------------------------
         Whenever the REDUCE is called on typedef_name or primary_exp rule
         (variable ref.), we first check if the ID that is trying to be reduced
         is actually a user-defined type (struct, union, typedef). If yes, than
         the REDUCE will be called.
 
-        iteration_stat disambiguation
-        -----------------------------
-        Handles the case where for loop contains declarations inside init
-        block. For example:
-            for (int i = 0; ...)
-
-        Ambiguity happens because part `i = 0` can be recognized both as exp_opt
-        and init_declarator_list_opt. In this case, part `i = 0` is always
-        reduced to init_declarator_list_opt rule.
 
         """
         # assume all possibilities are valid, and remove those that are not.
@@ -379,12 +365,6 @@ class CParser:
                                 valid = [possibility]
                             else:
                                 valid.remove(possibility)
-                            break
-
-                if possibility.symbol.name == "iteration_stat":
-                    if node.symbol.name == "init_declarator_list_opt":
-                        if len(node.children) == 0:
-                            valid.remove(possibility)
                             break
 
         parent.possibilities = valid
