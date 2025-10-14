@@ -9,6 +9,13 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## Unreleased
+
+### Fixed
+- Bug with finding array typedef name.
+- `if/else` ambiguity resolved statically in the grammar.
+- Reworked, simplified and corrected various disambiguation strategies.
+
 ## [0.5.2] - 2024.12.27
 
 ### Fixed
