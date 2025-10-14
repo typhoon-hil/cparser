@@ -1,9 +1,8 @@
-import collections
 import os
 from itertools import islice
 from typing import Callable, List, TypeVar
 
-from parglare import GLRParser, Grammar, Node, NodeNonTerm, NodeTerm
+from parglare import GLRParser, Grammar, NodeNonTerm, NodeTerm
 from parglare.glr import Parent
 from parglare.trees import tree_node_iterator, visitor
 
@@ -150,10 +149,10 @@ class CParser:
                     )
                 declaration.pos = pos
                 return declaration
-            
+
             if not init_decl_list:
                 init_decl_list = []
-                
+
             for d in init_decl_list:
                 declaration = process_declaration(d)
                 for spec in decl_specs:
@@ -223,8 +222,8 @@ class CParser:
         # Collect user-defined types
         self._glr.call_actions(forest.get_first_tree())
 
-        # Call disambiguate here
-        forest.disambiguate(self.disambiguate)
+        # Second pass disambiguation uses collected type information
+        forest.disambiguate(self.disambiguate_second_pass)
 
         self._process_typedefs()
         self._process_var_refs()
@@ -292,7 +291,7 @@ class CParser:
                                 key=lambda ts: ts[1], reverse=True))
             first_size = tree_sizes[0][1]
             return [t[0] for t in tree_sizes if t[1] == first_size]
-            
+
 
         valid = parent.possibilities
         # Sanity check
@@ -325,49 +324,40 @@ class CParser:
         if len(valid) > 0:
             parent.possibilities = valid
 
-    def disambiguate(self, parent):
-        """Filter for dynamic disambiguation
-
-        primary_exp disambiguations
-        ------------------------------------------
-        Whenever the REDUCE is called on typedef_name or primary_exp rule
-        (variable ref.), we first check if the ID that is trying to be reduced
-        is actually a user-defined type (struct, union, typedef). If yes, than
-        the REDUCE will be called.
-
+    def disambiguate_second_pass(self, parent):
+        """Use collected type information to prevent reduction of id to
+        primary_exp if id is a valid type name.
 
         """
-        # assume all possibilities are valid, and remove those that are not.
-        valid = list(parent.possibilities)
-        user_def_symbols = self.user_defined_types
 
-        for possibility in parent:
-            queue = collections.deque([possibility])
+        class InvalidTree(Exception):
+            pass
 
-            if len(valid) == 1:
-                break
+        def valid_tree(tree):
+            def visit(node, __subresults, __depth):
+                if node.symbol.name == 'primary_exp':
+                    child_parent = node.children[0]
+                    if len(child_parent.possibilities) == 1:
+                        child_term = child_parent.possibilities[0]
+                        if (child_term.is_term()
+                            and child_term.token.value in self.user_defined_types):
+                            raise InvalidTree
+                elif node.symbol.name == 'typedef_name':
+                    child_parent = node.children[0]
+                    if len(child_parent.possibilities) == 1:
+                        child_term = child_parent.possibilities[0]
+                        if (child_term.is_term()
+                            and child_term.token.value not in self.user_defined_types):
+                            raise InvalidTree
 
-            while queue:
-                node = queue.popleft()
-                for n in node:
-                    queue.append(n)
+            try:
+                visitor(tree, tree_node_iterator, visit)
+            except InvalidTree:
+                return False
+            return True
 
-                if not isinstance(node, Node):
-                    continue
+        parent.possibilities = list(filter(valid_tree, parent.possibilities))
 
-                if node.symbol.name == "primary_exp":
-                    child = node.children[0]
-                    if child.symbol.name != "cconst":
-
-                        token_value = node.children[0].token.value
-                        if token_value in user_def_symbols and possibility in valid:
-                            if token_value in self.functions.values():
-                                valid = [possibility]
-                            else:
-                                valid.remove(possibility)
-                            break
-
-        parent.possibilities = valid
 
     def _process_typedefs(self):
         """Replaces the typedef reference with Declaration object."""

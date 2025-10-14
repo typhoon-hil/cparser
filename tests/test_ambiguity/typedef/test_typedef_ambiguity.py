@@ -46,6 +46,18 @@ test_data = [
             int a;
         };
      """),
+
+    ('typedef_custom_type_in_parent_expr',
+     """
+        typedef int inherit;
+        inherit on_nominal = 0;
+
+        void output_fnc() {
+            if ((on_nominal) && (live_grid == 1)) {
+                synch = 1;
+            }
+        }
+     """),
 ]
 
 
