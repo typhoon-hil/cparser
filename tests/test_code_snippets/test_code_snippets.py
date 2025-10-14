@@ -1,29 +1,23 @@
-import os
 import glob
+import os
+
+import pytest  # noqa
+
 from tests.utils import check_or_update
 
+this_file = os.path.realpath(os.path.dirname(__file__))
+root_path = os.path.split(os.path.abspath(os.path.join(this_file)))[0]
 
-def test_code_snippets(parser, update):
+snippet_paths = glob.iglob(os.path.join(root_path, "test_code_snippets",
+                                        "code_snippets", "*.c"))
 
-    this_file = os.path.realpath(os.path.dirname(__file__))
-    root_path = os.path.split(os.path.abspath(os.path.join(this_file)))[0]
-
-    snippets_path = os.path.join(root_path, "test_code_snippets",
-                                 "code_snippets", "*.c")
-
-    example_idx = 0
-
-    for example in glob.iglob(snippets_path):
-        print("Parsing: %s" % example)
-
-        tree = parser.parse_file(example)
-
-        filename, _ = os.path.splitext(example)
-        file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
-                                 "{}.tree".format(filename))
-        check_or_update(update, tree, file_path)
-
-        example_idx += 1
+@pytest.mark.parametrize("example", snippet_paths)
+def test_code_snippets(example, parser, update):
+    tree = parser.parse_file(example)
+    filename, _ = os.path.splitext(example)
+    file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)),
+                             f"{filename}.tree")
+    check_or_update(update, tree, file_path)
 
 
 def test_decl_after_if(parser):
