@@ -1,6 +1,6 @@
 [project]
 name = "cparser"
-version = "0.5.3"
+version = "0.5.4"
 description = "C Parser written in pure Python"
 authors = [
     {name = "Typhoon HIL, Inc", email = "office@typhoon-hil.com"}
@@ -32,7 +32,7 @@ classifiers = [
 
 requires-python = ">=3.8"
 dependencies = [
-    "parglare==0.18"
+    "parglare>=0.18"
 ]
 
 [project.urls]
@@ -50,17 +50,24 @@ name = "cparser"
 [tool.flit.sdist]
 exclude = ["**/.*"]
 
-[project.optional-dependencies]
+[tool.uv]
+default-groups = ["dev"]
+
+[dependency-groups]
 dev = [
-    "ruff",
     "flit",
+    {include-group = "test"},
+    {include-group = "dbg"},
 ]
 
 test = [
     "ruff",
-    "coverage",
-    "coveralls",
-    "pytest"
+    "pytest",
+]
+
+dbg = [
+    "pudb",
+    "ipython",
 ]
 
 [tool.ruff]

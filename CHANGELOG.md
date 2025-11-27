@@ -9,6 +9,19 @@ Backward incompatible changes are marked with (BIC). These changes are the reaso
 for the major version increase so when upgrading between major versions please
 take a look at related PRs and issues and see if the change affects you.
 
+## [0.5.4] - 2025.11.27
+
+### Changed
+- Relax parglare dependency.
+- Configured `uv` for package management.
+
+
+## [0.5.3] - 2025.09.30
+
+### Fixed
+- Ambiguity between `typedef_name` and `init_declarator_list`. See #13.
+
+
 ## [0.5.2] - 2024.12.27
 
 ### Fixed

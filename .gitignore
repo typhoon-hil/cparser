@@ -68,7 +68,7 @@ target/
 .python-version
 
 # Ignore cached grammar
-cparser/cgrammar.pgt
+cparser/cgrammar.pgc
 
 # Visual Studio Code
 .vscode/
