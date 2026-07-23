@@ -3,8 +3,9 @@ from cparser.visitor import ASTVisitor
 
 class CodeGenerator(ASTVisitor):
     """Generates C code from the given AST"""
-    def __init__(self):
+    def __init__(self, keep_line_directives=False):
         self.indent = 0
+        self.keep_line_directives = keep_line_directives
 
     def _add_indent(self):
         return " " * self.indent
@@ -106,6 +107,9 @@ class CodeGenerator(ASTVisitor):
         return ret + ";"
 
     def visit_line_directive(self, node):
+        if self.keep_line_directives:
+            return f"\n# {node.children[1].value} {node.children[2].value}\n"
+
         return "\n"
 
     def _generate_stat(self, node):
