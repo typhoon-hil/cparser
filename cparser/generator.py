@@ -6,11 +6,15 @@ class CodeGenerator(ASTVisitor):
     """Generates C code from the given AST"""
     def __init__(
         self,
+        ast,
+        needs_wrapper=False,
         emit_line_directives=False,
         original_source_code='',
         line_adjust=0,
         line_file_prefix='',
     ):
+        self.ast = ast
+        self.needs_wrapper = needs_wrapper
         self.emit_line_directives = emit_line_directives
         self.original_source_code = original_source_code
         self.line_adjust = line_adjust
@@ -22,8 +26,15 @@ class CodeGenerator(ASTVisitor):
     def _add_indent(self):
         return " " * self.indent
 
-    def generate(self, ast, output_path=None):
-        code = self.visit(ast)
+    def generate(self):
+        code = self.visit(self.ast)
+
+        if self.emit_line_directives:
+            code = f'{code}\n# 1 "thcc_debug_keep_safeguard"\n'
+
+        if self.needs_wrapper:
+            code = "{\n" + code + "\n}"
+
         return code
 
     def visit(self, node):
