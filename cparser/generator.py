@@ -153,9 +153,6 @@ class CodeGenerator(ASTVisitor):
         ret = " ".join(self.visit(c) for c in node.children[:-1])
         return ret + ";"
 
-    def visit_line_directive(self, node):
-        return ""
-
     def _generate_stat(self, node):
         if node.symbol.name == "compound_stat":
             return self.visit(node)
