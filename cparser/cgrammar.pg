@@ -5,15 +5,8 @@ translation_unit            : external_decls=external_decl+
 
 external_decl               : function=function_definition
                             | declaration=decl
-                            | ld=line_directive
                             ;
 
-line_directive              : "#" int_const string line_directive_int?
-                            ;
-
-line_directive_int          : int_const
-                            | line_directive_int int_const
-                            ;
 
 function_definition         : decl_specs=decl_specs declarator=declarator decl_list=decl_list body=compound_stat
                             | declarator=declarator decl_list=decl_list body=compound_stat
@@ -70,7 +63,6 @@ init_declarator             : decl=declarator
                             ;
 
 struct_decl                 : spec_qualifier_list struct_declarator+[comma] ';'
-                            | line_directive
                             ;
 
 spec_qualifier_list         : type_spec spec_qualifier_list
@@ -119,8 +111,8 @@ initializer                 : assignment_exp
                             | '{' initializer_list comma? '}'
                             ;
 
-initializer_list            : line_directive? initializer
-                            | initializer_list comma line_directive? initializer
+initializer_list            : initializer
+                            | initializer_list comma initializer
                             ;
 
 type_name                   : spec_qualifier_list abstract_declarator
@@ -151,7 +143,6 @@ stat                        : labeled_stat
                             | selection_stat
                             | iteration_stat
                             | jump_stat
-                            | line_directive
                             ;
 
 labeled_stat                : id ':' stat
